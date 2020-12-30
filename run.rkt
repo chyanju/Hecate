@@ -10,7 +10,8 @@
          "src/grammar/syntax.rkt"
          "src/grammar/tree.rkt"
          "src/schedule/parse.rkt"
-         "src/tracing/synthesizer.rkt"
+         ; "src/tracing/synthesizer.rkt"
+         "src/checking/synthesizer.rkt"
          "src/backend/generate.rkt"
          "src/backend/printer.rkt")
 
