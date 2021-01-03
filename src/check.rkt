@@ -12,10 +12,10 @@
 		 (rename-out [new-ref ref] [solve-trace solve]))
 
 ; Activate an ILP solver (IBM CPLEX if available, otherwise Z3 in ILP mode)
-(current-solver
-  (if (cplex-available?) ; FIXME: Rosette encodes for CPLEX very slowly...
-	  (cplex)
-	  (z3 #:logic 'QF_LIA)))
+; (current-solver
+;   (if (cplex-available?) ; FIXME: Rosette encodes for CPLEX very slowly...
+; 	  (cplex)
+; 	  (z3 #:logic 'QF_LIA)))
 
 (define dependency (make-hasheq))
 ;(define antidependency (make-hasheq))
@@ -28,9 +28,34 @@
 
 ; Generate a fresh binary integer symbol.
 (define (bit*)
-  (define-symbolic* b integer?) ;; either true or false 0/1 ILP
-  (assert (<= 0 b 1))
+  (define-symbolic* b boolean?) ;; either true or false 0/1 ILP
+  ; (assert (<= 0 b 1))
   b)
+
+(define (encode-choose-at-most-one arg-row)
+	(assert
+		; this or is equiv to exclusively all to multi-choose
+		(apply ||
+			(append
+				; case 0: all are not chosen
+				(list (apply && (for/list ([k arg-row]) (! k))))
+				; case 1: choose one
+				(for/list ([i (range (vector-length arg-row))])
+					; ith element should be true
+					; (#f /\ #f /\ ... /\ #t /\ ...)
+					(apply &&
+						(for/list ([j (range (vector-length arg-row))])
+							(if (equal? i j)
+								(vector-ref arg-row j)
+								(! (vector-ref arg-row j))
+							)
+						)
+					)
+				)
+			)
+		)
+	)
+)
 
 ; Symbolic permutation of length at most k
 (struct permuted (guards elements) #:transparent)
@@ -40,9 +65,13 @@
   (let* ([n (length elements)]
 		 [matrix (build-matrix k n (const* bit*))])
 	(for ([row (matrix-rows matrix)])
-	  (assert (<= (vector-sum row) 1))) ; each hole can choose at most one statement
+	  ; (assert (<= (vector-sum row) 1))
+	  (encode-choose-at-most-one row)
+	) ; each hole can choose at most one statement
 	(for ([column (matrix-columns matrix)])
-	  (assert (<= (vector-sum column) 1))) ; each statement can be used by at most one hole
+	  ; (assert (<= (vector-sum column) 1))
+	  (encode-choose-at-most-one column)
+	) ; each statement can be used by at most one hole
 	(permuted matrix elements)))
 
 ; Instantiate a symbolic value (to include a symbolic permutation) according
@@ -55,7 +84,8 @@
 				  #:when #t
 				  [guard guards]
 				  [element elements]
-				  #:when (= (evaluate guard model) 1))
+				  ; #:when (= (evaluate guard model) 1))
+				  #:when (evaluate guard model))
 		 element)]
 	  [(? list?) (map subst value)]
 	  [(? vector?) (vector-map subst value)]
@@ -150,7 +180,8 @@
   ; `seteqv` to key the memo table.
   (let ([memo (make-hash)])
 	(match-lambda
-	  [(list) 1]
+	  ; [(list) 1]
+	  [(list) #t]
 	  [(list x) x]
 	  [(list x xs ...)
 	   (hash-ref! memo
@@ -159,19 +190,25 @@
 				   (let ([y (conjoin* xs)]
 						 [w (bit*)]
 						 [z (bit*)])
-					 (assert (<= z x))
-					 (assert (<= z y))
-					 (assert (= (+ w z) (+ x y)))
+					 ; (assert (<= z x))
+					 ; (assert (<= z y))
+					 ; (assert (= (+ w z) (+ x y)))
+					 (assert (=> z x))
+					 (assert (=> z y))
+					 ; FIXME: don't know how to translate the last one
+					 ; (assert (= (+ w z) (+ x y)))
 					 z)))]
 	)
   )
 )
 
 (define (trace-read! location guard-read [dependency dependency])
-  (define guard-write (apply + (hash-ref! dependency location null)))
+  ; (define guard-write (apply + (hash-ref! dependency location null)))
+  (define guard-write (apply || (hash-ref! dependency location null)))
   ;;guard-write: Guard where original write is performed
   ;;guard-read: Guard where the current read is performed
-	 (assert (<= guard-read guard-write) "|- assumption -\\-> dependency"))
+	 ; (assert (<= guard-read guard-write) "|- assumption -\\-> dependency"))
+	 (assert (=> guard-read guard-write) "|- assumption -\\-> dependency"))
 
 (define (trace-write! location guard [dependency dependency])
   (hash-update! dependency
@@ -181,12 +218,16 @@
 
 (define (trace-exit!)
   (for ([dependent (hash-values dependency)]) ;; reset the symbolic var: 0 or 1
-	(assert (<= 0 (apply + dependent) 1)))) 
+	; (assert (<= 0 (apply + dependent) 1))
+	(encode-choose-at-most-one (list->vector dependent))
+  )
+)
 
 ; Rollback after reaching trivially impossible path
 (define (rollback exn)
   (let ([phi (conjoin* path-condition)])
-	(assert (= phi 0) "|- !assumption"))) ;; assert that the current path cond is infeasible
+	; (assert (= phi 0) "|- !assumption"))) ;; assert that the current path cond is infeasible
+	(assert (! phi) "|- !assumption"))) ;; assert that the current path cond is infeasible
 
 ; Evaluate residual program commands.
 (define (evaluate-residue! program [shared-dependency null])
@@ -251,6 +292,7 @@
 ; After one or more traces, solve for an assignment of each multichoice to an
 ; appropriately sized list of its alternatives.
 (define (solve-trace)
-  (let ([model (optimize #:minimize (list (bit*)) #:guarantee #t)])
+  ; (let ([model (optimize #:minimize (list (bit*)) #:guarantee #t)])
+  (let ([model (solve (list (bit*)))])
 	; Extract the solved schedule, a mapping from holes to statements
 	(and (sat? model) (concretize model))))

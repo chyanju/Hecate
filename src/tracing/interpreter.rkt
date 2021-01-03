@@ -61,8 +61,16 @@
        (iterate self child reverse commands trav)]
       [(ag:eval attr)
        (define rule (ag:class-ref*/rule class attr))
+       ; (define tmp0 (tree-select self attr))
+       ; (define tmp1 (evaluate self (ag:rule-formula rule)))
+       ; (printf ">>> rule is:~a, tmp0 is:~a, which will be set as:~a\n" rule tmp0 tmp1)
+       ; (printf ">>> set-box! is:~a\n" set-box!)
        (set-box! (tree-select self attr)
-                 (evaluate self (ag:rule-formula rule)))]
+                 (evaluate self (ag:rule-formula rule)))
+       ; (define tmp2 (tree-select self attr))
+       ; (printf ">>> now tmp0 is:~a\n" tmp2)
+       ; (printf ">>> now tmp0 is:~a\n" tmp0)
+       ]
       [(ag:skip)
        (void)])))
 

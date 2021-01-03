@@ -44,31 +44,28 @@
 	(foldr ag:sequential (first traversals) (rest traversals))
 )
 
-(command-line
-	#:program "initialH"
-	#:once-each
-		[("-R" "--root") classname "Class to use as tree root" (*root* (string->symbol classname))]
-		[("-o" "--out") filename "File to output generated code" (*output* filename)]
-	#:args (schedule-sketch grammar-filename)
-		(begin
-			; (printf "> schedule sketch is:\n~a\n" schedule-sketch)
-			(define G (parse-grammar grammar-filename))
-			; (printf "> Grammar is:\n~a\n" G)
-			(define E (tree-examples G (*root*)))
-			; (for ([e E])
-			; 	(printf "> Tree is:\n~a\n" (inspect-tree e))
-			; )
-			(define S (parse-schedule-sketch G schedule-sketch))
-			; (printf "> Schedule is:\n~a\n" S)
-			(define S* (complete-sketch G S E))
-			; (printf "> Done synthesis.\n")
-			; (printf "> Complete schedule is:\n~a\n" S*)
-			(when S*
-				(define DS* (schedule->string S*))
-				(displayln DS*)
-				(define P (generate-program G S*))
-				(define file (open-output-file (*output*) #:mode 'text #:exists 'replace))
-				(parameterize ([current-output-port file]) (print-program P))
-			)
- 		)
+(define classname "Node")
+(*root* (string->symbol classname))
+(define schedule-sketch "fusion")
+(define grammar-filename "./benchmarks/molly/molly0.grammar")
+
+; (printf "> schedule sketch is:\n~a\n" schedule-sketch)
+(define G (parse-grammar grammar-filename))
+; (printf "> Grammar is:\n~a\n" G)
+(define E (tree-examples G (*root*)))
+; (for ([e E])
+; 	(printf "> Tree is:\n~a\n" (inspect-tree e))
+; )
+(define S (parse-schedule-sketch G schedule-sketch))
+; (printf "> Schedule is:\n~a\n" S)
+(define S* (complete-sketch G S E))
+; (printf "> Done synthesis.\n")
+; (printf "> Complete schedule is:\n~a\n" S*)
+(when S*
+	(define DS* (schedule->string S*))
+	(displayln DS*)
+	(define P (generate-program G S*))
+	(define file (open-output-file (*output*) #:mode 'text #:exists 'replace))
+	(parameterize ([current-output-port file]) (print-program P))
 )
+

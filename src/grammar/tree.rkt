@@ -15,6 +15,7 @@
                      [ref box]
                      [deref unbox]
                      [set-ref! set-box!])
+         inspect-tree
          tree-ref/field
          tree-ref/child
          tree-select
@@ -39,6 +40,21 @@
 
 ; TODO: Maybe represent fields with a prefix tree.
 (struct tree (class fields children) #:transparent)
+(define (inspect-tree arg-tree)
+  (format "~a"
+    (append
+      (list
+        (ag:class-name (tree-class arg-tree))
+      )
+      (for/list ([c (tree-children arg-tree)]) 
+        (format "~a=~a"
+          (car c)
+          (inspect-tree (cdr c))
+        )
+      )
+    )
+  )
+)
 
 (define (make-node class children)
   (define fields
@@ -133,7 +149,10 @@
 (define (tree-annotate node)
   (make-node (tree-class node)
              (dict-map-value (tree-children node)
-                             (distribute tree-annotate))))
+                             (distribute tree-annotate)
+             )
+  )
+)
 
 ; Validate some property of every output attribute value.
 (define (tree-validate tree check)

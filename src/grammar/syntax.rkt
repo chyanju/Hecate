@@ -25,10 +25,10 @@
 ; the particulars of the program representation as much as possible.
 
 ; attribute grammar
-(struct grammar (interfaces classes traits traversals))
+(struct grammar (interfaces classes traits traversals) #:transparent)
 
 ; interface definition
-(struct interface (name labels [classes #:mutable #:auto]) #:auto-value #f)
+(struct interface (name labels [classes #:mutable #:auto]) #:auto-value #f #:transparent)
 
 ; trait definition
 (struct trait (name body) #:transparent)
