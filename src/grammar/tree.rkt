@@ -41,15 +41,22 @@
 ; TODO: Maybe represent fields with a prefix tree.
 (struct tree (class fields children) #:transparent)
 (define (inspect-tree arg-tree)
-  (format "~a"
-    (append
-      (list
-        (ag:class-name (tree-class arg-tree))
-      )
-      (for/list ([c (tree-children arg-tree)]) 
-        (format "~a=~a"
-          (car c)
-          (inspect-tree (cdr c))
+  (if (list? arg-tree)
+    ; then
+    (format "~a"
+      (for/list ([t arg-tree]) (inspect-tree))
+    )
+    ; else
+    (format "~a"
+      (append
+        (list
+          (ag:class-name (tree-class arg-tree))
+        )
+        (for/list ([c (tree-children arg-tree)]) 
+          (format "~a=~a"
+            (car c)
+            (inspect-tree (cdr c))
+          )
         )
       )
     )
