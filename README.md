@@ -1,12 +1,12 @@
 ## initialH: Experimental Tree Traversal Synthesis
 
-### General-Purpose Encoding
+### General-Purpose Encoding with Verifier Support / CEGIS
 
 (The `checking` branch: general-purpose encoding.)
 
 ### Known Issues
 
-- Enabling full examples makes `ast` very slow.
+- ~~Enabling full examples makes `ast` very slow.~~
 
 - ~~Uninterpreted function parsing/interpretation is not yet supported.~~
   - ~~This affects (including): `hv-toy.grammar`,  `fmm.grammar`.~~
@@ -52,8 +52,14 @@ racket ./run.rkt --interface VirtualRoot --traversal fusion --grammar ./benchmar
 ### Benchmark Commands
 
 ```bash
+# toy.grammar
+racket ./run.rkt --interface Tree --traversal layout --grammar benchmarks/toy.grammar
+
 # hv-toy.grammar
 racket ./run.rkt --interface HVBox --traversal fuse --grammar benchmarks/grafter/hv-toy.grammar
+
+# hv-toy-list.grammar
+racket ./run.rkt --interface HVBox --traversal fuse --grammar benchmarks/grafter/hv-toy-list.grammar
 
 # grafter/oopsla-example.grammar: this takes forever to solve
 racket ./run.rkt --interface Root --traversal fuse --grammar ./benchmarks/grafter/oopsla-example.grammar

@@ -101,7 +101,11 @@
 			(tree-ref/field cur field)
 		]
 		[(cons child field)
-			(tree-ref/field (tree-ref/child self child) field)
+			(for/all ([tmp0 (tree-ref/child self child)])
+				(define tmp1 (if (box? tmp0) (unbox tmp0) tmp0))
+				(tree-ref/field tmp1 field)
+			)
+			; (tree-ref/field (tree-ref/child self child) field)
 		]
 		[_ (println-and-exit "# exception/tree-select/field: unsupported pattern ~a\n" attr)]
 	)
@@ -159,7 +163,11 @@
 			(tree-ref/ready cur field)
 		]
 		[(cons child field)
-			(tree-ref/ready (tree-ref/child self child) field)
+			(for/all ([tmp0 (tree-ref/child self child)])
+				(define tmp1 (if (box? tmp0) (unbox tmp0) tmp0))
+				(tree-ref/ready tmp1 field)
+			)
+			; (tree-ref/ready (tree-ref/child self child) field)
 		]
 		[_ (println-and-exit "# exception/tree-select/ready: unsupported pattern ~a\n" attr)]
 	)
@@ -257,12 +265,13 @@
 )
 
 ; Validate some property of every output attribute value.
-(define (tree-validate tree check)
+(define (tree-validate tree check [verbose #t])
 	(for ([p (tree-readys tree)])
 		(define label (car p))
 		(define value (cdr p))
-		(displayln `(check ,(ag:class-name (tree-class tree)) ,label))
-		; (printf "- which is: ~a\n" value)
+		(when verbose
+			(displayln `(check ,(ag:class-name (tree-class tree)) ,label))
+		)
 		(check value)
 	)
 	(for ([p (tree-children tree)])
@@ -270,9 +279,9 @@
 		(define subtree (cdr p))
 		(if (list? subtree)
 			(for ([node subtree])
-				(tree-validate node check)
+				(tree-validate node check verbose)
 			)
-			(tree-validate subtree check)
+			(tree-validate subtree check verbose)
 		)
 	)
 )

@@ -1,0 +1,56 @@
+// hv-toy with children of list
+
+traversal fuse {
+    case HBox {
+        iterate l { recur l; }
+        iterate r { recur r; }
+        ??;
+    }
+    case Leaf {
+        ??;
+    }
+}
+
+interface HVBox {
+    output w : int;
+    output h : int;
+}
+class HBox : HVBox {
+    children {
+        l : [HVBox];
+        r : [HVBox];
+    }
+    rules {
+        self.h := [0]{ l.h : default() } + self.w;
+        self.w := [0]{ l.w : default() } + [0]{ r.w : default() };
+    }
+}
+class Leaf : HVBox {
+    children {
+
+    }
+    rules {
+        self.w := 1.0;
+        self.h := 1.0;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
