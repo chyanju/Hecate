@@ -1,0 +1,2073 @@
+12 shift/reduce conflicts
+
+error:  state 104: shift/reduce conflict (shift DIVIDE, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift TIMES, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift MINUS, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift PLUS, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift GE, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift GT, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift LE, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift LT, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift NEQ, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift EQ, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift AND, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift OR, reduce by rule 33)
+
+state 0:
+
+	program : . traversal tree 
+
+	TRAVERSAL	shift 2
+
+	program	goto 136
+	traversal	goto 1
+
+	.	error
+
+
+state 1:
+
+	program : traversal . tree 
+
+	INTERFACE	shift 7
+	CLASS	shift 6
+
+	interface	goto 5
+	tree	goto 4
+	class	goto 3
+
+	.	reduce by rule 17
+
+
+state 2:
+
+	traversal : TRAVERSAL . ID LBRACE cases RBRACE 
+
+	ID	shift 8
+
+
+	.	error
+
+
+state 3:
+
+	tree : class . tree 
+
+	INTERFACE	shift 7
+	CLASS	shift 6
+
+	interface	goto 5
+	tree	goto 9
+	class	goto 3
+
+	.	reduce by rule 17
+
+
+state 4:
+
+	program : traversal tree .  (reduce by rule 0)
+
+
+
+	.	reduce by rule 0
+
+
+state 5:
+
+	tree : interface . tree 
+
+	INTERFACE	shift 7
+	CLASS	shift 6
+
+	interface	goto 5
+	tree	goto 10
+	class	goto 3
+
+	.	reduce by rule 17
+
+
+state 6:
+
+	class : CLASS . ID COLON ID LBRACE CHILDREN LBRACE children RBRACE RULES LBRACE rules RBRACE RBRACE 
+
+	ID	shift 11
+
+
+	.	error
+
+
+state 7:
+
+	interface : INTERFACE . ID LBRACE fields RBRACE 
+
+	ID	shift 12
+
+
+	.	error
+
+
+state 8:
+
+	traversal : TRAVERSAL ID . LBRACE cases RBRACE 
+
+	LBRACE	shift 13
+
+
+	.	error
+
+
+state 9:
+
+	tree : class tree .  (reduce by rule 19)
+
+
+
+	.	reduce by rule 19
+
+
+state 10:
+
+	tree : interface tree .  (reduce by rule 18)
+
+
+
+	.	reduce by rule 18
+
+
+state 11:
+
+	class : CLASS ID . COLON ID LBRACE CHILDREN LBRACE children RBRACE RULES LBRACE rules RBRACE RBRACE 
+
+	COLON	shift 14
+
+
+	.	error
+
+
+state 12:
+
+	interface : INTERFACE ID . LBRACE fields RBRACE 
+
+	LBRACE	shift 15
+
+
+	.	error
+
+
+state 13:
+
+	traversal : TRAVERSAL ID LBRACE . cases RBRACE 
+
+	CASE	shift 17
+
+	cases	goto 16
+
+	.	reduce by rule 2
+
+
+state 14:
+
+	class : CLASS ID COLON . ID LBRACE CHILDREN LBRACE children RBRACE RULES LBRACE rules RBRACE RBRACE 
+
+	ID	shift 18
+
+
+	.	error
+
+
+state 15:
+
+	interface : INTERFACE ID LBRACE . fields RBRACE 
+
+	INPUT	shift 22
+	OUTPUT	shift 21
+
+	fields	goto 20
+	io	goto 19
+
+	.	reduce by rule 10
+
+
+state 16:
+
+	traversal : TRAVERSAL ID LBRACE cases . RBRACE 
+
+	RBRACE	shift 23
+
+
+	.	error
+
+
+state 17:
+
+	cases : CASE . ID LBRACE stmts RBRACE cases 
+
+	ID	shift 24
+
+
+	.	error
+
+
+state 18:
+
+	class : CLASS ID COLON ID . LBRACE CHILDREN LBRACE children RBRACE RULES LBRACE rules RBRACE RBRACE 
+
+	LBRACE	shift 25
+
+
+	.	error
+
+
+state 19:
+
+	fields : io . ID COLON typ SEMICOLON fields 
+
+	ID	shift 26
+
+
+	.	error
+
+
+state 20:
+
+	interface : INTERFACE ID LBRACE fields . RBRACE 
+
+	RBRACE	shift 27
+
+
+	.	error
+
+
+state 21:
+
+	io : OUTPUT .  (reduce by rule 13)
+
+
+
+	.	reduce by rule 13
+
+
+state 22:
+
+	io : INPUT .  (reduce by rule 12)
+
+
+
+	.	reduce by rule 12
+
+
+state 23:
+
+	traversal : TRAVERSAL ID LBRACE cases RBRACE .  (reduce by rule 1)
+
+
+
+	.	reduce by rule 1
+
+
+state 24:
+
+	cases : CASE ID . LBRACE stmts RBRACE cases 
+
+	LBRACE	shift 28
+
+
+	.	error
+
+
+state 25:
+
+	class : CLASS ID COLON ID LBRACE . CHILDREN LBRACE children RBRACE RULES LBRACE rules RBRACE RBRACE 
+
+	CHILDREN	shift 29
+
+
+	.	error
+
+
+state 26:
+
+	fields : io ID . COLON typ SEMICOLON fields 
+
+	COLON	shift 30
+
+
+	.	error
+
+
+state 27:
+
+	interface : INTERFACE ID LBRACE fields RBRACE .  (reduce by rule 9)
+
+
+
+	.	reduce by rule 9
+
+
+state 28:
+
+	cases : CASE ID LBRACE . stmts RBRACE cases 
+
+	RECUR	shift 35
+	ITERATE	shift 34
+	HOLE	shift 33
+
+	stmts	goto 32
+	stmt	goto 31
+
+	.	reduce by rule 7
+
+
+state 29:
+
+	class : CLASS ID COLON ID LBRACE CHILDREN . LBRACE children RBRACE RULES LBRACE rules RBRACE RBRACE 
+
+	LBRACE	shift 36
+
+
+	.	error
+
+
+state 30:
+
+	fields : io ID COLON . typ SEMICOLON fields 
+
+	TINT	shift 40
+	TBOOL	shift 39
+	TSET	shift 38
+
+	typ	goto 37
+
+	.	error
+
+
+state 31:
+
+	stmts : stmt . stmts 
+
+	RECUR	shift 35
+	ITERATE	shift 34
+	HOLE	shift 33
+
+	stmts	goto 41
+	stmt	goto 31
+
+	.	reduce by rule 7
+
+
+state 32:
+
+	cases : CASE ID LBRACE stmts . RBRACE cases 
+
+	RBRACE	shift 42
+
+
+	.	error
+
+
+state 33:
+
+	stmt : HOLE . SEMICOLON 
+
+	SEMICOLON	shift 43
+
+
+	.	error
+
+
+state 34:
+
+	stmt : ITERATE . ID LBRACE stmts RBRACE 
+
+	ID	shift 44
+
+
+	.	error
+
+
+state 35:
+
+	stmt : RECUR . ID SEMICOLON 
+
+	ID	shift 45
+
+
+	.	error
+
+
+state 36:
+
+	class : CLASS ID COLON ID LBRACE CHILDREN LBRACE . children RBRACE RULES LBRACE rules RBRACE RBRACE 
+
+	ID	shift 47
+
+	children	goto 46
+
+	.	reduce by rule 21
+
+
+state 37:
+
+	fields : io ID COLON typ . SEMICOLON fields 
+
+	SEMICOLON	shift 48
+
+
+	.	error
+
+
+state 38:
+
+	typ : TSET .  (reduce by rule 16)
+
+
+
+	.	reduce by rule 16
+
+
+state 39:
+
+	typ : TBOOL .  (reduce by rule 15)
+
+
+
+	.	reduce by rule 15
+
+
+state 40:
+
+	typ : TINT .  (reduce by rule 14)
+
+
+
+	.	reduce by rule 14
+
+
+state 41:
+
+	stmts : stmt stmts .  (reduce by rule 8)
+
+
+
+	.	reduce by rule 8
+
+
+state 42:
+
+	cases : CASE ID LBRACE stmts RBRACE . cases 
+
+	CASE	shift 17
+
+	cases	goto 49
+
+	.	reduce by rule 2
+
+
+state 43:
+
+	stmt : HOLE SEMICOLON .  (reduce by rule 4)
+
+
+
+	.	reduce by rule 4
+
+
+state 44:
+
+	stmt : ITERATE ID . LBRACE stmts RBRACE 
+
+	LBRACE	shift 50
+
+
+	.	error
+
+
+state 45:
+
+	stmt : RECUR ID . SEMICOLON 
+
+	SEMICOLON	shift 51
+
+
+	.	error
+
+
+state 46:
+
+	class : CLASS ID COLON ID LBRACE CHILDREN LBRACE children . RBRACE RULES LBRACE rules RBRACE RBRACE 
+
+	RBRACE	shift 52
+
+
+	.	error
+
+
+state 47:
+
+	children : ID . COLON ctyp SEMICOLON children 
+
+	COLON	shift 53
+
+
+	.	error
+
+
+state 48:
+
+	fields : io ID COLON typ SEMICOLON . fields 
+
+	INPUT	shift 22
+	OUTPUT	shift 21
+
+	fields	goto 54
+	io	goto 19
+
+	.	reduce by rule 10
+
+
+state 49:
+
+	cases : CASE ID LBRACE stmts RBRACE cases .  (reduce by rule 3)
+
+
+
+	.	reduce by rule 3
+
+
+state 50:
+
+	stmt : ITERATE ID LBRACE . stmts RBRACE 
+
+	RECUR	shift 35
+	ITERATE	shift 34
+	HOLE	shift 33
+
+	stmts	goto 55
+	stmt	goto 31
+
+	.	reduce by rule 7
+
+
+state 51:
+
+	stmt : RECUR ID SEMICOLON .  (reduce by rule 6)
+
+
+
+	.	reduce by rule 6
+
+
+state 52:
+
+	class : CLASS ID COLON ID LBRACE CHILDREN LBRACE children RBRACE . RULES LBRACE rules RBRACE RBRACE 
+
+	RULES	shift 56
+
+
+	.	error
+
+
+state 53:
+
+	children : ID COLON . ctyp SEMICOLON children 
+
+	LBRACK	shift 59
+	ID	shift 58
+
+	ctyp	goto 57
+
+	.	error
+
+
+state 54:
+
+	fields : io ID COLON typ SEMICOLON fields .  (reduce by rule 11)
+
+
+
+	.	reduce by rule 11
+
+
+state 55:
+
+	stmt : ITERATE ID LBRACE stmts . RBRACE 
+
+	RBRACE	shift 60
+
+
+	.	error
+
+
+state 56:
+
+	class : CLASS ID COLON ID LBRACE CHILDREN LBRACE children RBRACE RULES . LBRACE rules RBRACE RBRACE 
+
+	LBRACE	shift 61
+
+
+	.	error
+
+
+state 57:
+
+	children : ID COLON ctyp . SEMICOLON children 
+
+	SEMICOLON	shift 62
+
+
+	.	error
+
+
+state 58:
+
+	ctyp : ID .  (reduce by rule 23)
+
+
+
+	.	reduce by rule 23
+
+
+state 59:
+
+	ctyp : LBRACK . ID RBRACK 
+
+	ID	shift 63
+
+
+	.	error
+
+
+state 60:
+
+	stmt : ITERATE ID LBRACE stmts RBRACE .  (reduce by rule 5)
+
+
+
+	.	reduce by rule 5
+
+
+state 61:
+
+	class : CLASS ID COLON ID LBRACE CHILDREN LBRACE children RBRACE RULES LBRACE . rules RBRACE RBRACE 
+
+	SELF	shift 67
+	ID	shift 66
+
+	path	goto 65
+	rules	goto 64
+
+	.	reduce by rule 25
+
+
+state 62:
+
+	children : ID COLON ctyp SEMICOLON . children 
+
+	ID	shift 47
+
+	children	goto 68
+
+	.	reduce by rule 21
+
+
+state 63:
+
+	ctyp : LBRACK ID . RBRACK 
+
+	RBRACK	shift 69
+
+
+	.	error
+
+
+state 64:
+
+	class : CLASS ID COLON ID LBRACE CHILDREN LBRACE children RBRACE RULES LBRACE rules . RBRACE RBRACE 
+
+	RBRACE	shift 70
+
+
+	.	error
+
+
+state 65:
+
+	rules : path . ASSIGN expr SEMICOLON rules 
+
+	ASSIGN	shift 71
+
+
+	.	error
+
+
+state 66:
+
+	path : ID . DOT ID 
+
+	DOT	shift 72
+
+
+	.	error
+
+
+state 67:
+
+	path : SELF . DOT ID 
+
+	DOT	shift 73
+
+
+	.	error
+
+
+state 68:
+
+	children : ID COLON ctyp SEMICOLON children .  (reduce by rule 22)
+
+
+
+	.	reduce by rule 22
+
+
+state 69:
+
+	ctyp : LBRACK ID RBRACK .  (reduce by rule 24)
+
+
+
+	.	reduce by rule 24
+
+
+state 70:
+
+	class : CLASS ID COLON ID LBRACE CHILDREN LBRACE children RBRACE RULES LBRACE rules RBRACE . RBRACE 
+
+	RBRACE	shift 74
+
+
+	.	error
+
+
+state 71:
+
+	rules : path ASSIGN . expr SEMICOLON rules 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 76
+	path	goto 75
+
+	.	error
+
+
+state 72:
+
+	path : ID DOT . ID 
+
+	ID	shift 85
+
+
+	.	error
+
+
+state 73:
+
+	path : SELF DOT . ID 
+
+	ID	shift 86
+
+
+	.	error
+
+
+state 74:
+
+	class : CLASS ID COLON ID LBRACE CHILDREN LBRACE children RBRACE RULES LBRACE rules RBRACE RBRACE .  (reduce by rule 20)
+
+
+
+	.	reduce by rule 20
+
+
+state 75:
+
+	expr : path .  (reduce by rule 32)
+
+
+
+	.	reduce by rule 32
+
+
+state 76:
+
+	expr : expr . PLUS expr 
+	expr : expr . MINUS expr 
+	expr : expr . TIMES expr 
+	expr : expr . DIVIDE expr 
+	expr : expr . AND expr 
+	expr : expr . OR expr 
+	expr : expr . EQ expr 
+	expr : expr . NEQ expr 
+	expr : expr . GT expr 
+	expr : expr . GE expr 
+	expr : expr . LT expr 
+	expr : expr . LE expr 
+	rules : path ASSIGN expr . SEMICOLON rules 
+
+	OR	shift 99
+	AND	shift 98
+	EQ	shift 97
+	NEQ	shift 96
+	LT	shift 95
+	LE	shift 94
+	GT	shift 93
+	GE	shift 92
+	PLUS	shift 91
+	MINUS	shift 90
+	TIMES	shift 89
+	DIVIDE	shift 88
+	SEMICOLON	shift 87
+
+
+	.	error
+
+
+state 77:
+
+	expr : BOOL .  (reduce by rule 31)
+
+
+
+	.	reduce by rule 31
+
+
+state 78:
+
+	expr : ID . LPAREN RPAREN 
+	expr : ID . LPAREN args RPAREN 
+	path : ID . DOT ID 
+
+	DOT	shift 72
+	LPAREN	shift 100
+
+
+	.	error
+
+
+state 79:
+
+	expr : INT .  (reduce by rule 30)
+
+
+
+	.	reduce by rule 30
+
+
+state 80:
+
+	expr : LBRACK . INT RBRACK LBRACE path COLON expr RBRACE 
+
+	INT	shift 101
+
+
+	.	error
+
+
+state 81:
+
+	expr : LPAREN . expr RPAREN 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 102
+	path	goto 75
+
+	.	error
+
+
+state 82:
+
+	expr : MINUS . expr 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 103
+	path	goto 75
+
+	.	error
+
+
+state 83:
+
+	expr : NOT . expr 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 104
+	path	goto 75
+
+	.	error
+
+
+state 84:
+
+	expr : IF . expr THEN expr ELSE expr 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 105
+	path	goto 75
+
+	.	error
+
+
+state 85:
+
+	path : ID DOT ID .  (reduce by rule 28)
+
+
+
+	.	reduce by rule 28
+
+
+state 86:
+
+	path : SELF DOT ID .  (reduce by rule 27)
+
+
+
+	.	reduce by rule 27
+
+
+state 87:
+
+	rules : path ASSIGN expr SEMICOLON . rules 
+
+	SELF	shift 67
+	ID	shift 66
+
+	path	goto 65
+	rules	goto 106
+
+	.	reduce by rule 25
+
+
+state 88:
+
+	expr : expr DIVIDE . expr 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 107
+	path	goto 75
+
+	.	error
+
+
+state 89:
+
+	expr : expr TIMES . expr 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 108
+	path	goto 75
+
+	.	error
+
+
+state 90:
+
+	expr : expr MINUS . expr 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 109
+	path	goto 75
+
+	.	error
+
+
+state 91:
+
+	expr : expr PLUS . expr 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 110
+	path	goto 75
+
+	.	error
+
+
+state 92:
+
+	expr : expr GE . expr 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 111
+	path	goto 75
+
+	.	error
+
+
+state 93:
+
+	expr : expr GT . expr 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 112
+	path	goto 75
+
+	.	error
+
+
+state 94:
+
+	expr : expr LE . expr 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 113
+	path	goto 75
+
+	.	error
+
+
+state 95:
+
+	expr : expr LT . expr 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 114
+	path	goto 75
+
+	.	error
+
+
+state 96:
+
+	expr : expr NEQ . expr 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 115
+	path	goto 75
+
+	.	error
+
+
+state 97:
+
+	expr : expr EQ . expr 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 116
+	path	goto 75
+
+	.	error
+
+
+state 98:
+
+	expr : expr AND . expr 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 117
+	path	goto 75
+
+	.	error
+
+
+state 99:
+
+	expr : expr OR . expr 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 118
+	path	goto 75
+
+	.	error
+
+
+state 100:
+
+	expr : ID LPAREN . RPAREN 
+	expr : ID LPAREN . args RPAREN 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	RPAREN	shift 121
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 120
+	path	goto 75
+	args	goto 119
+
+	.	error
+
+
+state 101:
+
+	expr : LBRACK INT . RBRACK LBRACE path COLON expr RBRACE 
+
+	RBRACK	shift 122
+
+
+	.	error
+
+
+state 102:
+
+	expr : LPAREN expr . RPAREN 
+	expr : expr . PLUS expr 
+	expr : expr . MINUS expr 
+	expr : expr . TIMES expr 
+	expr : expr . DIVIDE expr 
+	expr : expr . AND expr 
+	expr : expr . OR expr 
+	expr : expr . EQ expr 
+	expr : expr . NEQ expr 
+	expr : expr . GT expr 
+	expr : expr . GE expr 
+	expr : expr . LT expr 
+	expr : expr . LE expr 
+
+	OR	shift 99
+	AND	shift 98
+	EQ	shift 97
+	NEQ	shift 96
+	LT	shift 95
+	LE	shift 94
+	GT	shift 93
+	GE	shift 92
+	PLUS	shift 91
+	MINUS	shift 90
+	TIMES	shift 89
+	DIVIDE	shift 88
+	RPAREN	shift 123
+
+
+	.	error
+
+
+state 103:
+
+	expr : MINUS expr .  (reduce by rule 34)
+	expr : expr . PLUS expr 
+	expr : expr . MINUS expr 
+	expr : expr . TIMES expr 
+	expr : expr . DIVIDE expr 
+	expr : expr . AND expr 
+	expr : expr . OR expr 
+	expr : expr . EQ expr 
+	expr : expr . NEQ expr 
+	expr : expr . GT expr 
+	expr : expr . GE expr 
+	expr : expr . LT expr 
+	expr : expr . LE expr 
+
+
+
+	.	reduce by rule 34
+
+error:  state 104: shift/reduce conflict (shift DIVIDE, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift TIMES, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift MINUS, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift PLUS, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift GE, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift GT, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift LE, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift LT, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift NEQ, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift EQ, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift AND, reduce by rule 33)
+error:  state 104: shift/reduce conflict (shift OR, reduce by rule 33)
+
+state 104:
+
+	expr : NOT expr .  (reduce by rule 33)
+	expr : expr . PLUS expr 
+	expr : expr . MINUS expr 
+	expr : expr . TIMES expr 
+	expr : expr . DIVIDE expr 
+	expr : expr . AND expr 
+	expr : expr . OR expr 
+	expr : expr . EQ expr 
+	expr : expr . NEQ expr 
+	expr : expr . GT expr 
+	expr : expr . GE expr 
+	expr : expr . LT expr 
+	expr : expr . LE expr 
+
+	OR	shift 99
+	AND	shift 98
+	EQ	shift 97
+	NEQ	shift 96
+	LT	shift 95
+	LE	shift 94
+	GT	shift 93
+	GE	shift 92
+	PLUS	shift 91
+	MINUS	shift 90
+	TIMES	shift 89
+	DIVIDE	shift 88
+
+
+	.	reduce by rule 33
+
+
+state 105:
+
+	expr : expr . PLUS expr 
+	expr : expr . MINUS expr 
+	expr : expr . TIMES expr 
+	expr : expr . DIVIDE expr 
+	expr : expr . AND expr 
+	expr : expr . OR expr 
+	expr : expr . EQ expr 
+	expr : expr . NEQ expr 
+	expr : expr . GT expr 
+	expr : expr . GE expr 
+	expr : expr . LT expr 
+	expr : expr . LE expr 
+	expr : IF expr . THEN expr ELSE expr 
+
+	THEN	shift 124
+	OR	shift 99
+	AND	shift 98
+	EQ	shift 97
+	NEQ	shift 96
+	LT	shift 95
+	LE	shift 94
+	GT	shift 93
+	GE	shift 92
+	PLUS	shift 91
+	MINUS	shift 90
+	TIMES	shift 89
+	DIVIDE	shift 88
+
+
+	.	error
+
+
+state 106:
+
+	rules : path ASSIGN expr SEMICOLON rules .  (reduce by rule 26)
+
+
+
+	.	reduce by rule 26
+
+
+state 107:
+
+	expr : expr . PLUS expr 
+	expr : expr . MINUS expr 
+	expr : expr . TIMES expr 
+	expr : expr . DIVIDE expr 
+	expr : expr DIVIDE expr .  (reduce by rule 38)
+	expr : expr . AND expr 
+	expr : expr . OR expr 
+	expr : expr . EQ expr 
+	expr : expr . NEQ expr 
+	expr : expr . GT expr 
+	expr : expr . GE expr 
+	expr : expr . LT expr 
+	expr : expr . LE expr 
+
+
+
+	.	reduce by rule 38
+
+
+state 108:
+
+	expr : expr . PLUS expr 
+	expr : expr . MINUS expr 
+	expr : expr . TIMES expr 
+	expr : expr TIMES expr .  (reduce by rule 37)
+	expr : expr . DIVIDE expr 
+	expr : expr . AND expr 
+	expr : expr . OR expr 
+	expr : expr . EQ expr 
+	expr : expr . NEQ expr 
+	expr : expr . GT expr 
+	expr : expr . GE expr 
+	expr : expr . LT expr 
+	expr : expr . LE expr 
+
+
+
+	.	reduce by rule 37
+
+
+state 109:
+
+	expr : expr . PLUS expr 
+	expr : expr . MINUS expr 
+	expr : expr MINUS expr .  (reduce by rule 36)
+	expr : expr . TIMES expr 
+	expr : expr . DIVIDE expr 
+	expr : expr . AND expr 
+	expr : expr . OR expr 
+	expr : expr . EQ expr 
+	expr : expr . NEQ expr 
+	expr : expr . GT expr 
+	expr : expr . GE expr 
+	expr : expr . LT expr 
+	expr : expr . LE expr 
+
+	TIMES	shift 89
+	DIVIDE	shift 88
+
+
+	.	reduce by rule 36
+
+
+state 110:
+
+	expr : expr . PLUS expr 
+	expr : expr PLUS expr .  (reduce by rule 35)
+	expr : expr . MINUS expr 
+	expr : expr . TIMES expr 
+	expr : expr . DIVIDE expr 
+	expr : expr . AND expr 
+	expr : expr . OR expr 
+	expr : expr . EQ expr 
+	expr : expr . NEQ expr 
+	expr : expr . GT expr 
+	expr : expr . GE expr 
+	expr : expr . LT expr 
+	expr : expr . LE expr 
+
+	TIMES	shift 89
+	DIVIDE	shift 88
+
+
+	.	reduce by rule 35
+
+
+state 111:
+
+	expr : expr . PLUS expr 
+	expr : expr . MINUS expr 
+	expr : expr . TIMES expr 
+	expr : expr . DIVIDE expr 
+	expr : expr . AND expr 
+	expr : expr . OR expr 
+	expr : expr . EQ expr 
+	expr : expr . NEQ expr 
+	expr : expr . GT expr 
+	expr : expr . GE expr 
+	expr : expr GE expr .  (reduce by rule 44)
+	expr : expr . LT expr 
+	expr : expr . LE expr 
+
+	THEN	reduce by rule 44
+	ELSE	reduce by rule 44
+	OR	reduce by rule 44
+	AND	reduce by rule 44
+	PLUS	shift 91
+	MINUS	shift 90
+	TIMES	shift 89
+	DIVIDE	shift 88
+	RPAREN	reduce by rule 44
+	RBRACE	reduce by rule 44
+	SEMICOLON	reduce by rule 44
+	COMMA	reduce by rule 44
+
+
+	.	error
+
+
+state 112:
+
+	expr : expr . PLUS expr 
+	expr : expr . MINUS expr 
+	expr : expr . TIMES expr 
+	expr : expr . DIVIDE expr 
+	expr : expr . AND expr 
+	expr : expr . OR expr 
+	expr : expr . EQ expr 
+	expr : expr . NEQ expr 
+	expr : expr . GT expr 
+	expr : expr GT expr .  (reduce by rule 43)
+	expr : expr . GE expr 
+	expr : expr . LT expr 
+	expr : expr . LE expr 
+
+	THEN	reduce by rule 43
+	ELSE	reduce by rule 43
+	OR	reduce by rule 43
+	AND	reduce by rule 43
+	PLUS	shift 91
+	MINUS	shift 90
+	TIMES	shift 89
+	DIVIDE	shift 88
+	RPAREN	reduce by rule 43
+	RBRACE	reduce by rule 43
+	SEMICOLON	reduce by rule 43
+	COMMA	reduce by rule 43
+
+
+	.	error
+
+
+state 113:
+
+	expr : expr . PLUS expr 
+	expr : expr . MINUS expr 
+	expr : expr . TIMES expr 
+	expr : expr . DIVIDE expr 
+	expr : expr . AND expr 
+	expr : expr . OR expr 
+	expr : expr . EQ expr 
+	expr : expr . NEQ expr 
+	expr : expr . GT expr 
+	expr : expr . GE expr 
+	expr : expr . LT expr 
+	expr : expr . LE expr 
+	expr : expr LE expr .  (reduce by rule 46)
+
+	THEN	reduce by rule 46
+	ELSE	reduce by rule 46
+	OR	reduce by rule 46
+	AND	reduce by rule 46
+	PLUS	shift 91
+	MINUS	shift 90
+	TIMES	shift 89
+	DIVIDE	shift 88
+	RPAREN	reduce by rule 46
+	RBRACE	reduce by rule 46
+	SEMICOLON	reduce by rule 46
+	COMMA	reduce by rule 46
+
+
+	.	error
+
+
+state 114:
+
+	expr : expr . PLUS expr 
+	expr : expr . MINUS expr 
+	expr : expr . TIMES expr 
+	expr : expr . DIVIDE expr 
+	expr : expr . AND expr 
+	expr : expr . OR expr 
+	expr : expr . EQ expr 
+	expr : expr . NEQ expr 
+	expr : expr . GT expr 
+	expr : expr . GE expr 
+	expr : expr . LT expr 
+	expr : expr LT expr .  (reduce by rule 45)
+	expr : expr . LE expr 
+
+	THEN	reduce by rule 45
+	ELSE	reduce by rule 45
+	OR	reduce by rule 45
+	AND	reduce by rule 45
+	PLUS	shift 91
+	MINUS	shift 90
+	TIMES	shift 89
+	DIVIDE	shift 88
+	RPAREN	reduce by rule 45
+	RBRACE	reduce by rule 45
+	SEMICOLON	reduce by rule 45
+	COMMA	reduce by rule 45
+
+
+	.	error
+
+
+state 115:
+
+	expr : expr . PLUS expr 
+	expr : expr . MINUS expr 
+	expr : expr . TIMES expr 
+	expr : expr . DIVIDE expr 
+	expr : expr . AND expr 
+	expr : expr . OR expr 
+	expr : expr . EQ expr 
+	expr : expr . NEQ expr 
+	expr : expr NEQ expr .  (reduce by rule 42)
+	expr : expr . GT expr 
+	expr : expr . GE expr 
+	expr : expr . LT expr 
+	expr : expr . LE expr 
+
+	THEN	reduce by rule 42
+	ELSE	reduce by rule 42
+	OR	reduce by rule 42
+	AND	reduce by rule 42
+	PLUS	shift 91
+	MINUS	shift 90
+	TIMES	shift 89
+	DIVIDE	shift 88
+	RPAREN	reduce by rule 42
+	RBRACE	reduce by rule 42
+	SEMICOLON	reduce by rule 42
+	COMMA	reduce by rule 42
+
+
+	.	error
+
+
+state 116:
+
+	expr : expr . PLUS expr 
+	expr : expr . MINUS expr 
+	expr : expr . TIMES expr 
+	expr : expr . DIVIDE expr 
+	expr : expr . AND expr 
+	expr : expr . OR expr 
+	expr : expr . EQ expr 
+	expr : expr EQ expr .  (reduce by rule 41)
+	expr : expr . NEQ expr 
+	expr : expr . GT expr 
+	expr : expr . GE expr 
+	expr : expr . LT expr 
+	expr : expr . LE expr 
+
+	THEN	reduce by rule 41
+	ELSE	reduce by rule 41
+	OR	reduce by rule 41
+	AND	reduce by rule 41
+	PLUS	shift 91
+	MINUS	shift 90
+	TIMES	shift 89
+	DIVIDE	shift 88
+	RPAREN	reduce by rule 41
+	RBRACE	reduce by rule 41
+	SEMICOLON	reduce by rule 41
+	COMMA	reduce by rule 41
+
+
+	.	error
+
+
+state 117:
+
+	expr : expr . PLUS expr 
+	expr : expr . MINUS expr 
+	expr : expr . TIMES expr 
+	expr : expr . DIVIDE expr 
+	expr : expr . AND expr 
+	expr : expr AND expr .  (reduce by rule 39)
+	expr : expr . OR expr 
+	expr : expr . EQ expr 
+	expr : expr . NEQ expr 
+	expr : expr . GT expr 
+	expr : expr . GE expr 
+	expr : expr . LT expr 
+	expr : expr . LE expr 
+
+	EQ	shift 97
+	NEQ	shift 96
+	LT	shift 95
+	LE	shift 94
+	GT	shift 93
+	GE	shift 92
+	PLUS	shift 91
+	MINUS	shift 90
+	TIMES	shift 89
+	DIVIDE	shift 88
+
+
+	.	reduce by rule 39
+
+
+state 118:
+
+	expr : expr . PLUS expr 
+	expr : expr . MINUS expr 
+	expr : expr . TIMES expr 
+	expr : expr . DIVIDE expr 
+	expr : expr . AND expr 
+	expr : expr . OR expr 
+	expr : expr OR expr .  (reduce by rule 40)
+	expr : expr . EQ expr 
+	expr : expr . NEQ expr 
+	expr : expr . GT expr 
+	expr : expr . GE expr 
+	expr : expr . LT expr 
+	expr : expr . LE expr 
+
+	AND	shift 98
+	EQ	shift 97
+	NEQ	shift 96
+	LT	shift 95
+	LE	shift 94
+	GT	shift 93
+	GE	shift 92
+	PLUS	shift 91
+	MINUS	shift 90
+	TIMES	shift 89
+	DIVIDE	shift 88
+
+
+	.	reduce by rule 40
+
+
+state 119:
+
+	expr : ID LPAREN args . RPAREN 
+
+	RPAREN	shift 125
+
+
+	.	error
+
+
+state 120:
+
+	expr : expr . PLUS expr 
+	expr : expr . MINUS expr 
+	expr : expr . TIMES expr 
+	expr : expr . DIVIDE expr 
+	expr : expr . AND expr 
+	expr : expr . OR expr 
+	expr : expr . EQ expr 
+	expr : expr . NEQ expr 
+	expr : expr . GT expr 
+	expr : expr . GE expr 
+	expr : expr . LT expr 
+	expr : expr . LE expr 
+	args : expr .  (reduce by rule 51)
+	args : expr . COMMA args 
+
+	OR	shift 99
+	AND	shift 98
+	EQ	shift 97
+	NEQ	shift 96
+	LT	shift 95
+	LE	shift 94
+	GT	shift 93
+	GE	shift 92
+	PLUS	shift 91
+	MINUS	shift 90
+	TIMES	shift 89
+	DIVIDE	shift 88
+	COMMA	shift 126
+
+
+	.	reduce by rule 51
+
+
+state 121:
+
+	expr : ID LPAREN RPAREN .  (reduce by rule 49)
+
+
+
+	.	reduce by rule 49
+
+
+state 122:
+
+	expr : LBRACK INT RBRACK . LBRACE path COLON expr RBRACE 
+
+	LBRACE	shift 127
+
+
+	.	error
+
+
+state 123:
+
+	expr : LPAREN expr RPAREN .  (reduce by rule 29)
+
+
+
+	.	reduce by rule 29
+
+
+state 124:
+
+	expr : IF expr THEN . expr ELSE expr 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 128
+	path	goto 75
+
+	.	error
+
+
+state 125:
+
+	expr : ID LPAREN args RPAREN .  (reduce by rule 50)
+
+
+
+	.	reduce by rule 50
+
+
+state 126:
+
+	args : expr COMMA . args 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 120
+	path	goto 75
+	args	goto 129
+
+	.	error
+
+
+state 127:
+
+	expr : LBRACK INT RBRACK LBRACE . path COLON expr RBRACE 
+
+	SELF	shift 67
+	ID	shift 66
+
+	path	goto 130
+
+	.	error
+
+
+state 128:
+
+	expr : expr . PLUS expr 
+	expr : expr . MINUS expr 
+	expr : expr . TIMES expr 
+	expr : expr . DIVIDE expr 
+	expr : expr . AND expr 
+	expr : expr . OR expr 
+	expr : expr . EQ expr 
+	expr : expr . NEQ expr 
+	expr : expr . GT expr 
+	expr : expr . GE expr 
+	expr : expr . LT expr 
+	expr : expr . LE expr 
+	expr : IF expr THEN expr . ELSE expr 
+
+	ELSE	shift 131
+	OR	shift 99
+	AND	shift 98
+	EQ	shift 97
+	NEQ	shift 96
+	LT	shift 95
+	LE	shift 94
+	GT	shift 93
+	GE	shift 92
+	PLUS	shift 91
+	MINUS	shift 90
+	TIMES	shift 89
+	DIVIDE	shift 88
+
+
+	.	error
+
+
+state 129:
+
+	args : expr COMMA args .  (reduce by rule 52)
+
+
+
+	.	reduce by rule 52
+
+
+state 130:
+
+	expr : LBRACK INT RBRACK LBRACE path . COLON expr RBRACE 
+
+	COLON	shift 132
+
+
+	.	error
+
+
+state 131:
+
+	expr : IF expr THEN expr ELSE . expr 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 133
+	path	goto 75
+
+	.	error
+
+
+state 132:
+
+	expr : LBRACK INT RBRACK LBRACE path COLON . expr RBRACE 
+
+	SELF	shift 67
+	IF	shift 84
+	NOT	shift 83
+	MINUS	shift 82
+	LPAREN	shift 81
+	LBRACK	shift 80
+	INT	shift 79
+	ID	shift 78
+	BOOL	shift 77
+
+	expr	goto 134
+	path	goto 75
+
+	.	error
+
+
+state 133:
+
+	expr : expr . PLUS expr 
+	expr : expr . MINUS expr 
+	expr : expr . TIMES expr 
+	expr : expr . DIVIDE expr 
+	expr : expr . AND expr 
+	expr : expr . OR expr 
+	expr : expr . EQ expr 
+	expr : expr . NEQ expr 
+	expr : expr . GT expr 
+	expr : expr . GE expr 
+	expr : expr . LT expr 
+	expr : expr . LE expr 
+	expr : IF expr THEN expr ELSE expr .  (reduce by rule 47)
+
+	OR	shift 99
+	AND	shift 98
+	EQ	shift 97
+	NEQ	shift 96
+	LT	shift 95
+	LE	shift 94
+	GT	shift 93
+	GE	shift 92
+	PLUS	shift 91
+	MINUS	shift 90
+	TIMES	shift 89
+	DIVIDE	shift 88
+
+
+	.	reduce by rule 47
+
+
+state 134:
+
+	expr : expr . PLUS expr 
+	expr : expr . MINUS expr 
+	expr : expr . TIMES expr 
+	expr : expr . DIVIDE expr 
+	expr : expr . AND expr 
+	expr : expr . OR expr 
+	expr : expr . EQ expr 
+	expr : expr . NEQ expr 
+	expr : expr . GT expr 
+	expr : expr . GE expr 
+	expr : expr . LT expr 
+	expr : expr . LE expr 
+	expr : LBRACK INT RBRACK LBRACE path COLON expr . RBRACE 
+
+	OR	shift 99
+	AND	shift 98
+	EQ	shift 97
+	NEQ	shift 96
+	LT	shift 95
+	LE	shift 94
+	GT	shift 93
+	GE	shift 92
+	PLUS	shift 91
+	MINUS	shift 90
+	TIMES	shift 89
+	DIVIDE	shift 88
+	RBRACE	shift 135
+
+
+	.	error
+
+
+state 135:
+
+	expr : LBRACK INT RBRACK LBRACE path COLON expr RBRACE .  (reduce by rule 48)
+
+
+
+	.	reduce by rule 48
+
+
+state 136:
+
+
+	EOF	accept
+
+
+	.	error
+
+283 of 616 action table entries left after compaction
+78 goto table entries

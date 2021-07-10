@@ -1,11 +1,17 @@
+structure Tokens = Tokens
+
 type pos = int
-type lexresult = Tokens.token
+type svalue = Tokens.svalue
+type ('a,'b) token = ('a,'b) Tokens.token
+type lexresult= (svalue,pos) token
+
 val lineNum = ErrorMsg.lineNum
 val linePos = ErrorMsg.linePos
 fun eof pos = let val pos = hd(!linePos) in Tokens.EOF(pos,pos) end
 fun inc r = (r := !r + 1)
 
 %% 
+%header (functor HecateLexFun(structure Tokens: Hecate_TOKENS));
 ws = [\ \t];
 digit = [0-9];
 letter=[A-Za-z];
@@ -15,7 +21,7 @@ letter=[A-Za-z];
 <INITIAL>{ws}+  => (continue());
 
 
-<INITIAL>"traversel"    => (Tokens.TRAVERSAL(yypos, yypos + size yytext));
+<INITIAL>"traversal"    => (Tokens.TRAVERSAL(yypos, yypos + size yytext));
 <INITIAL>"case"      => (Tokens.CASE(yypos, yypos + size yytext));
 <INITIAL>"recur"       => (Tokens.RECUR(yypos, yypos + size yytext));
 <INITIAL>"iterate"    => (Tokens.ITERATE(yypos, yypos + size yytext));
@@ -23,8 +29,9 @@ letter=[A-Za-z];
 <INITIAL>"interface"      => (Tokens.INTERFACE(yypos, yypos + size yytext));
 <INITIAL>"input"       => (Tokens.INPUT(yypos, yypos + size yytext));
 <INITIAL>"output"      => (Tokens.OUTPUT(yypos, yypos + size yytext));
-<INITIAL>"int" => (Tokens.TINT(yypos, yypos + size yytext));
+<INITIAL>"int"       => (Tokens.TINT(yypos, yypos + size yytext));
 <INITIAL>"bool"      => (Tokens.TBOOL(yypos, yypos + size yytext));
+<INITIAL>"set"       => (Tokens.TSET(yypos, yypos + size yytext));
 <INITIAL>"class"     => (Tokens.CLASS(yypos, yypos + size yytext));
 <INITIAL>"children"    => (Tokens.CHILDREN(yypos, yypos + size yytext));
 <INITIAL>"rules"       => (Tokens.RULES(yypos, yypos + size yytext));
@@ -65,6 +72,7 @@ letter=[A-Za-z];
 
 <INITIAL>":" => (Tokens.COLON(yypos, yypos + size yytext));
 <INITIAL>";" => (Tokens.SEMICOLON(yypos, yypos + size yytext));
+<INITIAL>"," => (Tokens.COMMA(yypos, yypos + size yytext));
 
 <INITIAL>"true" => (Tokens.BOOL(true, yypos, yypos + size yytext));
 <INITIAL>"false" => (Tokens.BOOL(false, yypos, yypos + size yytext));
@@ -75,7 +83,7 @@ letter=[A-Za-z];
 
 
 <INITIAL>"//" => (YYBEGIN COMMENT; continue());
-<COMMENT>"\n" => (YYBEGIN INITIAL; continue());
+<COMMENT>"\n" => (inc lineNum; YYBEGIN INITIAL; continue());
 <COMMENT>.    => (continue());
 
 <INITIAL>.          => (ErrorMsg.error yypos ("illegal character " ^ yytext); continue());

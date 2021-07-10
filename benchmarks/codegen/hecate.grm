@@ -1,0 +1,161 @@
+%%
+
+%term
+    EOF
+    | TRAVERSAL
+    | CASE
+    | RECUR
+    | ITERATE
+    | HOLE
+    | INTERFACE
+    | INPUT
+    | OUTPUT
+    | TINT
+    | TBOOL
+    | TSET
+    | CLASS
+    | CHILDREN
+    | RULES
+    | SELF
+    | ASSIGN
+    | DOT
+    | IF | THEN | ELSE
+    | OR | AND | NOT
+    | EQ | NEQ | LT | LE | GT | GE
+    | PLUS | MINUS | TIMES | DIVIDE
+    | LPAREN | RPAREN | LBRACK | RBRACK | LBRACE | RBRACE
+    | COLON | SEMICOLON | COMMA
+    | INT of int
+    | ID of string
+    | BOOL of bool
+    | PREC_UMINUS
+
+%nonterm program
+    | traversal of Traversal.t
+    | cases of Case.t list
+    | stmts of TStmt.t list
+    | stmt of TStmt.t
+    | interface of Interface.t
+    | fields of Field.t list
+    | io of InOut.t
+    | typ of Type.t
+    | tree
+    | class of Class.t
+    | expr of Expr.t
+    | path of Path.t
+    | rules of Rule.t list
+    | children of Child.t list
+    | ctyp of CType.t
+    | args of Expr.t list
+
+%nonassoc THEN
+%nonassoc ELSE
+%nonassoc ASSIGN
+%left OR
+%left AND
+%nonassoc EQ NEQ LT LE GT GE
+%left PLUS MINUS
+%left TIMES DIVIDE
+%left PREC_UMINUS
+
+%pos int
+%verbose
+%start program
+%eop EOF
+%noshift EOF
+
+%name Hecate
+
+%keyword TRAVERSAL CASE RECUR ITERATE INTERFACE INPUT OUTPUT TINT TBOOL TSET CLASS CHILDREN RULES SELF IF THEN ELSE 
+
+%prefer THEN ELSE LPAREN
+
+%value ID ("bogus")
+%value BOOL (true)
+%value INT (1)
+
+%%
+
+program	:
+    traversal tree (print(Traversal.toString traversal))
+
+traversal:
+  TRAVERSAL ID LBRACE cases RBRACE ((ID, cases))
+
+cases: ([])
+  | CASE ID LBRACE stmts RBRACE cases ((ID,stmts) :: cases)
+
+stmt:
+    HOLE SEMICOLON (TStmt.SHole)
+  | ITERATE ID LBRACE stmts RBRACE (TStmt.SIterate(ID, stmts))
+  | RECUR ID SEMICOLON (TStmt.SRecur(ID))
+
+stmts: ([])
+  | stmt stmts (stmt :: stmts)
+
+interface:
+  INTERFACE ID LBRACE fields RBRACE ((ID, fields))
+
+fields:
+    ([])
+  | io ID COLON typ SEMICOLON fields ((io, ID, typ) :: fields)
+
+io:
+    INPUT (InOut.I)
+  | OUTPUT (InOut.O)
+
+typ:
+    TINT (Type.Int)
+  | TBOOL (Type.Bool)
+  | TSET (Type.Set)
+
+tree: ()
+  | interface tree (print(Interface.toString interface))
+  | class tree (print(Class.toString class))
+
+class:
+  CLASS ID COLON ID LBRACE CHILDREN LBRACE children RBRACE RULES LBRACE rules RBRACE RBRACE ({name=ID, interface=ID2, children=children, rules=rules})
+
+children:
+    ([])
+  | ID COLON ctyp SEMICOLON children ((ID,ctyp) :: children)
+
+ctyp:
+    ID (CType.Interface(ID))
+  | LBRACK ID RBRACK (CType.List(ID))
+
+rules:
+    ([])
+  | path ASSIGN expr SEMICOLON rules ((path, expr) :: rules)
+
+path:
+    SELF DOT ID (Path.Dot(Path.Self, ID))
+  | ID DOT ID (Path.Dot(Path.Child(ID), ID2))
+
+expr:
+    LPAREN expr RPAREN (expr)
+  | INT (Expr.Int(INT))
+  | BOOL (Expr.Bool(BOOL))
+  | path (Expr.Path path)
+  | NOT expr (Expr.Unop(Unop.Not, expr))
+  | MINUS expr %prec PREC_UMINUS (Expr.Binop(Binop.Minus, Expr.Int(0), expr))
+  | expr PLUS expr (Expr.Binop(Binop.Plus, expr1, expr2))
+  | expr MINUS expr (Expr.Binop(Binop.Minus, expr1, expr2))
+  | expr TIMES expr (Expr.Binop(Binop.Times, expr1, expr2))
+  | expr DIVIDE expr (Expr.Binop(Binop.Divide, expr1, expr2))
+  | expr AND expr (Expr.Binop(Binop.And, expr1, expr2))
+  | expr OR expr (Expr.Binop(Binop.Or, expr1, expr2))
+  | expr EQ expr (Expr.Binrel(Binrel.EQ, expr1, expr2))
+  | expr NEQ expr (Expr.Binrel(Binrel.NEQ, expr1, expr2))
+  | expr GT expr (Expr.Binrel(Binrel.GT, expr1, expr2))
+  | expr GE expr (Expr.Binrel(Binrel.GE, expr1, expr2))
+  | expr LT expr (Expr.Binrel(Binrel.LT, expr1, expr2))
+  | expr LE expr (Expr.Binrel(Binrel.LE, expr1, expr2))
+  | IF expr THEN expr ELSE expr (Expr.If(expr1, expr2, expr3))
+  | LBRACK INT RBRACK LBRACE path COLON expr RBRACE (Expr.Hack(INT, path, expr))
+  | ID LPAREN RPAREN (Expr.Call(ID, []))
+  | ID LPAREN args RPAREN (Expr.Call(ID, args))
+
+args:
+    expr ([expr])
+  | expr COMMA args (expr :: args)

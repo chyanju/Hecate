@@ -1,16 +1,15 @@
 Group is
 
-ast.sml
-errormsg.sml
+(* errormsg.sml
 parse.sml
+hecate.lex
+hecate.grm *)
+
+ast.sml
 prelude.sml
 symbol.sml
 table.sig
 table.sml
-
-hecate.lex
-hecate.grm
-
 $/smlnj-lib.cm
 $/basis.cm
-$/ml-yacc-lib.cm
+(* $/ml-yacc-lib.cm *)

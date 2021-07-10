@@ -38,6 +38,7 @@ fun PLUS(i,j) = "PLUS   " ^ makestring(i:int)
 fun MINUS(i,j) = "MINUS   " ^ makestring(i:int)
 fun TIMES(i,j) = "TIMES   " ^ makestring(i:int)
 fun DIVIDE(i,j) = "DIVIDE   " ^ makestring(i:int)
+
 fun RBRACE(i,j) = "RBRACE   " ^ makestring(i:int)
 fun LBRACE(i,j) = "LBRACE   " ^ makestring(i:int)
 fun RBRACK(i,j) = "RBRACK   " ^ makestring(i:int)
