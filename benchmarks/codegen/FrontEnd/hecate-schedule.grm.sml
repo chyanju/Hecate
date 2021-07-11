@@ -197,10 +197,11 @@ infix 5 $$
 fun x $$ y = y::x
 val is_keyword =
 fn (T 1) => true | (T 2) => true | (T 3) => true | (T 4) => true | (T 
-5) => true | (T 6) => true | (T 9) => true | (T 10) => true | (T 11)
- => true | (T 12) => true | (T 13) => true | (T 14) => true | (T 15)
- => true | (T 16) => true | (T 17) => true | (T 18) => true | (T 21)
- => true | (T 22) => true | (T 23) => true | _ => false
+5) => true | (T 6) => true | (T 7) => true | (T 9) => true | (T 10)
+ => true | (T 11) => true | (T 12) => true | (T 13) => true | (T 14)
+ => true | (T 15) => true | (T 16) => true | (T 17) => true | (T 18)
+ => true | (T 21) => true | (T 22) => true | (T 23) => true | (T 49)
+ => true | _ => false
 val preferred_change : (term list * term list) list = 
 (nil
 ,nil
@@ -264,23 +265,23 @@ fn (T 0) => "EOF"
   | (T 46) => "INT"
   | (T 47) => "ID"
   | (T 48) => "BOOL"
-  | (T 49) => "PREC_UMINUS"
+  | (T 49) => "NULL"
+  | (T 50) => "PREC_UMINUS"
   | _ => "bogus-term"
 local open Header in
 val errtermvalue=
 fn (T 47) => MlyValue.ID(fn () => ("bogus")) | 
-(T 48) => MlyValue.BOOL(fn () => (true)) | 
 (T 46) => MlyValue.INT(fn () => (1)) | 
 _ => MlyValue.VOID
 end
 val terms : term list = nil
- $$ (T 49) $$ (T 45) $$ (T 44) $$ (T 43) $$ (T 42) $$ (T 41) $$ (T 40)
- $$ (T 39) $$ (T 38) $$ (T 37) $$ (T 36) $$ (T 35) $$ (T 34) $$ (T 33)
- $$ (T 32) $$ (T 31) $$ (T 30) $$ (T 29) $$ (T 28) $$ (T 27) $$ (T 26)
- $$ (T 25) $$ (T 24) $$ (T 23) $$ (T 22) $$ (T 21) $$ (T 20) $$ (T 19)
- $$ (T 18) $$ (T 17) $$ (T 16) $$ (T 15) $$ (T 14) $$ (T 13) $$ (T 12)
- $$ (T 11) $$ (T 10) $$ (T 9) $$ (T 8) $$ (T 7) $$ (T 6) $$ (T 5) $$ 
-(T 4) $$ (T 3) $$ (T 2) $$ (T 1) $$ (T 0)end
+ $$ (T 50) $$ (T 49) $$ (T 45) $$ (T 44) $$ (T 43) $$ (T 42) $$ (T 41)
+ $$ (T 40) $$ (T 39) $$ (T 38) $$ (T 37) $$ (T 36) $$ (T 35) $$ (T 34)
+ $$ (T 33) $$ (T 32) $$ (T 31) $$ (T 30) $$ (T 29) $$ (T 28) $$ (T 27)
+ $$ (T 26) $$ (T 25) $$ (T 24) $$ (T 23) $$ (T 22) $$ (T 21) $$ (T 20)
+ $$ (T 19) $$ (T 18) $$ (T 17) $$ (T 16) $$ (T 15) $$ (T 14) $$ (T 13)
+ $$ (T 12) $$ (T 11) $$ (T 10) $$ (T 9) $$ (T 8) $$ (T 7) $$ (T 6) $$ 
+(T 5) $$ (T 4) $$ (T 3) $$ (T 2) $$ (T 1) $$ (T 0)end
 structure Actions =
 struct 
 exception mlyAction of int
@@ -494,7 +495,9 @@ fun ID (i,p1,p2) = Token.TOKEN (ParserData.LrTable.T 47,(
 ParserData.MlyValue.ID (fn () => i),p1,p2))
 fun BOOL (i,p1,p2) = Token.TOKEN (ParserData.LrTable.T 48,(
 ParserData.MlyValue.BOOL (fn () => i),p1,p2))
-fun PREC_UMINUS (p1,p2) = Token.TOKEN (ParserData.LrTable.T 49,(
+fun NULL (p1,p2) = Token.TOKEN (ParserData.LrTable.T 49,(
+ParserData.MlyValue.VOID,p1,p2))
+fun PREC_UMINUS (p1,p2) = Token.TOKEN (ParserData.LrTable.T 50,(
 ParserData.MlyValue.VOID,p1,p2))
 end
 end

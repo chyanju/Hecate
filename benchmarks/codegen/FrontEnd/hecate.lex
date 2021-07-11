@@ -51,7 +51,7 @@ letter=[A-Za-z];
 <INITIAL>"!" => (Tokens.NOT(yypos, yypos + size yytext));
 
 <INITIAL>"==" => (Tokens.EQ(yypos, yypos + size yytext));
-<INITIAL>"<>" => (Tokens.NEQ(yypos, yypos + size yytext));
+<INITIAL>"!=" => (Tokens.NEQ(yypos, yypos + size yytext));
 <INITIAL>"<" => (Tokens.LT(yypos, yypos + size yytext));
 <INITIAL>"<=" => (Tokens.LE(yypos, yypos + size yytext));
 <INITIAL>">" => (Tokens.GT(yypos, yypos + size yytext));
@@ -79,6 +79,7 @@ letter=[A-Za-z];
 
 <INITIAL>"true" => (Tokens.BOOL(true, yypos, yypos + size yytext));
 <INITIAL>"false" => (Tokens.BOOL(false, yypos, yypos + size yytext));
+<INITIAL>"null" => (Tokens.NULL(yypos, yypos + size yytext));
 <INITIAL>{digit}+  => (case Int.fromString yytext of
                 NONE   => (ErrorMsg.error yypos ("illegal integer " ^ yytext); continue())
               | SOME n => Tokens.INT(n, yypos, yypos + size yytext));

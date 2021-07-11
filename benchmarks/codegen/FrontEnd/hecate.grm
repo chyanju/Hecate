@@ -30,6 +30,7 @@
   | INT of int
   | ID of string
   | BOOL of bool
+  | NULL
   | PREC_UMINUS
 
 %nonterm
@@ -57,6 +58,7 @@
 %nonassoc ASSIGN
 %left OR
 %left AND
+%nonassoc NOT
 %nonassoc EQ NEQ LT LE GT GE
 %left PLUS MINUS
 %left TIMES DIVIDE
@@ -70,12 +72,16 @@
 
 %name Hecate
 
-%keyword TRAVERSAL CASE RECUR ITERATE LEFT RIGHT EVAL INTERFACE INPUT OUTPUT TINT TBOOL TSET CLASS CHILDREN RULES SELF IF THEN ELSE 
+%keyword
+  TRAVERSAL CASE RECUR ITERATE LEFT RIGHT EVAL
+  INTERFACE INPUT OUTPUT TINT TBOOL TSET
+  CLASS CHILDREN RULES
+  SELF IF THEN ELSE
+  NULL
 
 %prefer THEN ELSE LPAREN
 
 %value ID ("bogus")
-%value BOOL (true)
 %value INT (1)
 
 %%
@@ -145,8 +151,13 @@ path:
 
 expr:
     LPAREN expr RPAREN (expr)
+  (* constants *)
   | INT (Expr.Int(INT))
   | BOOL (Expr.Bool(BOOL))
+  | NULL (Expr.Null)
+  (* constants written as uninterpreted functions *)
+  (* | BOOL LPAREN RPAREN (Expr.Bool(BOOL)) *)
+  (* | NULL LPAREN RPAREN (Expr.Null) *)
   | path (Expr.Path path)
   | NOT expr (Expr.Unop(Unop.Not, expr))
   | MINUS expr %prec PREC_UMINUS (Expr.Binop(Binop.Minus, Expr.Int(0), expr))

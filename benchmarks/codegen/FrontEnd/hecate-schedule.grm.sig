@@ -3,6 +3,7 @@ sig
 type ('a,'b) token
 type svalue
 val PREC_UMINUS:  'a * 'a -> (svalue,'a) token
+val NULL:  'a * 'a -> (svalue,'a) token
 val BOOL: (bool) *  'a * 'a -> (svalue,'a) token
 val ID: (string) *  'a * 'a -> (svalue,'a) token
 val INT: (int) *  'a * 'a -> (svalue,'a) token

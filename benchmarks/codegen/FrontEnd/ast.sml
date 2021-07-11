@@ -92,7 +92,8 @@ end
 
 structure Expr = struct
   datatype t =
-      Int of int
+      Null
+    | Int of int
     | Bool of bool
     | Unop of Unop.t * t
     | Binop of Binop.t * t * t
@@ -102,7 +103,8 @@ structure Expr = struct
     | Hack of int * Path.t * t
     | Call of string * (t list)
 
-  fun toString (Int n) = Int.toString n
+  fun toString Null = "null"
+    | toString (Int n) = Int.toString n
     | toString (Bool b) = Bool.toString b
     | toString (Unop(oper, e)) = Format.format "%s(%s)" (map Format.STR [Unop.toString oper, toString e])
     | toString (Binop(oper, e1, e2)) = Format.format "(%s) %s (%s)" (map Format.STR [toString e1, Binop.toString oper, toString e2])
@@ -136,6 +138,18 @@ structure Class = struct
         interface,
         Prelude.join(map Child.toString children),
         Prelude.join(map Rule.toString rules)])
+  fun mapChild f (T{name, interface, children, rules}) =
+    T{
+      name=name,
+      interface=interface,
+      children=map f children,
+      rules=rules}
+  fun mapRule f (T{name, interface, children, rules}) =
+    T{
+      name=name,
+      interface=interface,
+      children=children,
+      rules=map f rules}
 end
 
 (* Group (bundling one interface with classes) *)
@@ -144,6 +158,8 @@ structure Group = struct
   fun toString (T{interface, classes}) =
     Interface.toString interface ^ "\n" ^
     Prelude.join(map Class.toString classes) ^ "\n"
+  fun mapInterface f (T{interface, classes}) = T{interface=f interface, classes=classes}
+  fun mapClass f (T{interface, classes}) = T{interface=interface, classes=map f classes}
 end
 
 (* Schedule *)
