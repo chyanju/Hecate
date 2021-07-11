@@ -2,51 +2,55 @@
 
 %term
     EOF
-    | TRAVERSAL
-    | CASE
-    | RECUR
-    | ITERATE
-    | HOLE
-    | INTERFACE
-    | INPUT
-    | OUTPUT
-    | TINT
-    | TBOOL
-    | TSET
-    | CLASS
-    | CHILDREN
-    | RULES
-    | SELF
-    | ASSIGN
-    | DOT
-    | IF | THEN | ELSE
-    | OR | AND | NOT
-    | EQ | NEQ | LT | LE | GT | GE
-    | PLUS | MINUS | TIMES | DIVIDE
-    | LPAREN | RPAREN | LBRACK | RBRACK | LBRACE | RBRACE
-    | COLON | SEMICOLON | COMMA
-    | INT of int
-    | ID of string
-    | BOOL of bool
-    | PREC_UMINUS
+  | TRAVERSAL
+  | CASE
+  | RECUR
+  | ITERATE
+  | LEFT | RIGHT
+  | EVAL
+  | HOLE
+  | INTERFACE
+  | INPUT
+  | OUTPUT
+  | TINT
+  | TBOOL
+  | TSET
+  | CLASS
+  | CHILDREN
+  | RULES
+  | SELF
+  | ASSIGN
+  | DOT
+  | IF | THEN | ELSE
+  | OR | AND | NOT
+  | EQ | NEQ | LT | LE | GT | GE
+  | PLUS | MINUS | TIMES | DIVIDE
+  | LPAREN | RPAREN | LBRACK | RBRACK | LBRACE | RBRACE
+  | COLON | SEMICOLON | COMMA
+  | INT of int
+  | ID of string
+  | BOOL of bool
+  | PREC_UMINUS
 
-%nonterm program
-    | traversal of Traversal.t
-    | cases of Case.t list
-    | stmts of TStmt.t list
-    | stmt of TStmt.t
-    | interface of Interface.t
-    | fields of Field.t list
-    | io of InOut.t
-    | typ of Type.t
-    | tree
-    | class of Class.t
-    | expr of Expr.t
-    | path of Path.t
-    | rules of Rule.t list
-    | children of Child.t list
-    | ctyp of CType.t
-    | args of Expr.t list
+%nonterm
+    program of Group.t list
+  | traversal of Traversal.t
+  | cases of Case.t list
+  | tstmts of TStmt.t list
+  | tstmt of TStmt.t
+  | interface of Interface.t
+  | fields of Field.t list
+  | io of InOut.t
+  | typ of Type.t
+  | groups of Group.t list
+  | classes of Class.t list
+  | class of Class.t
+  | expr of Expr.t
+  | path of Path.t
+  | rules of Rule.t list
+  | children of Child.t list
+  | ctyp of CType.t
+  | args of Expr.t list
 
 %nonassoc THEN
 %nonassoc ELSE
@@ -66,7 +70,7 @@
 
 %name Hecate
 
-%keyword TRAVERSAL CASE RECUR ITERATE INTERFACE INPUT OUTPUT TINT TBOOL TSET CLASS CHILDREN RULES SELF IF THEN ELSE 
+%keyword TRAVERSAL CASE RECUR ITERATE LEFT RIGHT EVAL INTERFACE INPUT OUTPUT TINT TBOOL TSET CLASS CHILDREN RULES SELF IF THEN ELSE 
 
 %prefer THEN ELSE LPAREN
 
@@ -77,21 +81,21 @@
 %%
 
 program	:
-    traversal tree (print(Traversal.toString traversal))
+  traversal groups (groups)
 
 traversal:
   TRAVERSAL ID LBRACE cases RBRACE ((ID, cases))
 
 cases: ([])
-  | CASE ID LBRACE stmts RBRACE cases ((ID,stmts) :: cases)
+  | CASE ID LBRACE tstmts RBRACE cases ((ID,tstmts) :: cases)
 
-stmt:
+tstmt:
     HOLE SEMICOLON (TStmt.SHole)
-  | ITERATE ID LBRACE stmts RBRACE (TStmt.SIterate(ID, stmts))
+  | ITERATE ID LBRACE tstmts RBRACE (TStmt.SIterate(ID, tstmts))
   | RECUR ID SEMICOLON (TStmt.SRecur(ID))
 
-stmts: ([])
-  | stmt stmts (stmt :: stmts)
+tstmts: ([])
+  | tstmt tstmts (tstmt :: tstmts)
 
 interface:
   INTERFACE ID LBRACE fields RBRACE ((ID, fields))
@@ -109,12 +113,19 @@ typ:
   | TBOOL (Type.Bool)
   | TSET (Type.Set)
 
-tree: ()
-  | interface tree (print(Interface.toString interface))
-  | class tree (print(Class.toString class))
+groups:
+    ([])
+  | interface classes groups (Group.T {interface=interface, classes=classes} :: groups)
+
+classes:
+    ([])
+  | class classes (class :: classes)
 
 class:
-  CLASS ID COLON ID LBRACE CHILDREN LBRACE children RBRACE RULES LBRACE rules RBRACE RBRACE ({name=ID, interface=ID2, children=children, rules=rules})
+  CLASS ID COLON ID LBRACE
+    CHILDREN LBRACE children RBRACE
+    RULES LBRACE rules RBRACE RBRACE
+  (Class.T{name=ID, interface=ID2, children=children, rules=rules})
 
 children:
     ([])

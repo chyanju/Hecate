@@ -10,14 +10,9 @@ structure TStmt = struct
     | toString (SRecur(on)) = "recur " ^ on ^ ";"
 end
 
-structure Block = struct
-  type t = TStmt.t list
-  fun toString b = Prelude.join(map TStmt.toString b)
-end
-
 structure Case = struct
-  type t = string * Block.t
-  fun toString (id, b) = "case " ^ id ^ " {\n" ^ Block.toString b ^ "\n}"
+  type t = string * (TStmt.t list)
+  fun toString (id, b) = "case " ^ id ^ " {\n" ^ Prelude.join(map TStmt.toString b) ^ "\n}"
 end
 
 structure Traversal = struct
@@ -125,13 +120,57 @@ structure Rule = struct
 end
 
 structure Class = struct
-  type t = {name: string, interface: string, children: Child.t list, rules: Rule.t list}
-  fun toString {name, interface, children, rules} =
-    Format.format "class %s : %s {\nchildren {\n%s\n}\nrules {\n%s\n}\n}\n" (map Format.STR [
-      name,
-      interface,
-      Prelude.join(map Child.toString children),
-      Prelude.join(map Rule.toString rules)])
+  datatype t = T of {name: string, interface: string, children: Child.t list, rules: Rule.t list}
+  fun toString (T{name, interface, children, rules}) =
+    Format.format (Prelude.join [
+      "class %s : %s {",
+        "children {",
+          "%s",
+        "}",
+        "rules {",
+          "%s",
+        "}",
+      "}", ""])
+      (map Format.STR [
+        name,
+        interface,
+        Prelude.join(map Child.toString children),
+        Prelude.join(map Rule.toString rules)])
+end
+
+(* Group (bundling one interface with classes) *)
+structure Group = struct
+  datatype t = T of {interface: Interface.t, classes: Class.t list}
+  fun toString (T{interface, classes}) =
+    Interface.toString interface ^ "\n" ^
+    Prelude.join(map Class.toString classes) ^ "\n"
+end
+
+(* Schedule *)
+structure SStmt = struct
+  datatype dir = Left | Right
+  fun dirToString Left = "left"
+    | dirToString Right = "right"
+
+  datatype t =
+      Eval of Path.t
+    | Recur of string
+    | Iterate of dir option * string * (t list)
+
+  fun toString (Eval p) = "eval " ^ Path.toString p
+    | toString (Iterate(NONE, on, b)) = "iterate " ^ on ^ " { " ^ Prelude.unwords(map toString b) ^ " }"
+    | toString (Iterate(SOME(d), on, b)) = "iterate[" ^ dirToString d ^ "] " ^ on ^ " { " ^ Prelude.unwords(map toString b) ^ " }"
+    | toString (Recur(on)) = "recur " ^ on ^ ";"
+end
+
+structure ScheduleCase = struct
+  type t = string * (SStmt.t list)
+  fun toString (id, b) = "case " ^ id ^ " {\n" ^ Prelude.join(map SStmt.toString b) ^ "\n}"
+end
+
+structure Schedule = struct
+  type t = string * (ScheduleCase.t list)
+  fun toString (id, cs) = "traversal " ^ id ^ " {\n" ^ (Prelude.join(map ScheduleCase.toString cs)) ^ "\n}\n"
 end
 
 structure AST = struct

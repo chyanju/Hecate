@@ -1,15 +1,17 @@
 Group is
 
-ast.sml
-errormsg.sml
-parse.sml
 prelude.sml
 symbol.sml
 table.sig
 table.sml
 
-hecate.lex
-hecate.grm
+FrontEnd/ast.sml
+FrontEnd/errormsg.sml
+FrontEnd/parse.sml
+
+FrontEnd/hecate.lex
+FrontEnd/hecate.grm
+FrontEnd/hecate-schedule.grm
 
 $/smlnj-lib.cm
 $/basis.cm

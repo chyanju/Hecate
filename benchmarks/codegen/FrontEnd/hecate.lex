@@ -25,6 +25,9 @@ letter=[A-Za-z];
 <INITIAL>"case"      => (Tokens.CASE(yypos, yypos + size yytext));
 <INITIAL>"recur"       => (Tokens.RECUR(yypos, yypos + size yytext));
 <INITIAL>"iterate"    => (Tokens.ITERATE(yypos, yypos + size yytext));
+<INITIAL>"left"       => (Tokens.LEFT(yypos, yypos + size yytext));
+<INITIAL>"right"       => (Tokens.RIGHT(yypos, yypos + size yytext));
+<INITIAL>"eval"       => (Tokens.EVAL(yypos, yypos + size yytext));
 
 <INITIAL>"interface"      => (Tokens.INTERFACE(yypos, yypos + size yytext));
 <INITIAL>"input"       => (Tokens.INPUT(yypos, yypos + size yytext));

@@ -1,4 +1,4 @@
-signature Hecate_TOKENS =
+signature HecateSchedule_TOKENS =
 sig
 type ('a,'b) token
 type svalue
@@ -44,15 +44,18 @@ val OUTPUT:  'a * 'a -> (svalue,'a) token
 val INPUT:  'a * 'a -> (svalue,'a) token
 val INTERFACE:  'a * 'a -> (svalue,'a) token
 val HOLE:  'a * 'a -> (svalue,'a) token
+val EVAL:  'a * 'a -> (svalue,'a) token
+val RIGHT:  'a * 'a -> (svalue,'a) token
+val LEFT:  'a * 'a -> (svalue,'a) token
 val ITERATE:  'a * 'a -> (svalue,'a) token
 val RECUR:  'a * 'a -> (svalue,'a) token
 val CASE:  'a * 'a -> (svalue,'a) token
 val TRAVERSAL:  'a * 'a -> (svalue,'a) token
 val EOF:  'a * 'a -> (svalue,'a) token
 end
-signature Hecate_LRVALS=
+signature HecateSchedule_LRVALS=
 sig
-structure Tokens : Hecate_TOKENS
+structure Tokens : HecateSchedule_TOKENS
 structure ParserData:PARSER_DATA
 sharing type ParserData.Token.token = Tokens.token
 sharing type ParserData.svalue = Tokens.svalue

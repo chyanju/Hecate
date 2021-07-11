@@ -1,0 +1,77 @@
+%%
+
+%term
+  EOF
+  | TRAVERSAL
+  | CASE
+  | RECUR
+  | ITERATE
+  | LEFT | RIGHT
+  | EVAL
+  | HOLE
+  | INTERFACE
+  | INPUT
+  | OUTPUT
+  | TINT
+  | TBOOL
+  | TSET
+  | CLASS
+  | CHILDREN
+  | RULES
+  | SELF
+  | ASSIGN
+  | DOT
+  | IF | THEN | ELSE
+  | OR | AND | NOT
+  | EQ | NEQ | LT | LE | GT | GE
+  | PLUS | MINUS | TIMES | DIVIDE
+  | LPAREN | RPAREN | LBRACK | RBRACK | LBRACE | RBRACE
+  | COLON | SEMICOLON | COMMA
+  | INT of int
+  | ID of string
+  | BOOL of bool
+  | PREC_UMINUS
+
+%nonterm
+    schedule of Schedule.t
+  | cases of ScheduleCase.t list
+  | stmts of SStmt.t list
+  | stmt of SStmt.t
+  | path of Path.t
+
+%pos int
+%verbose
+%start schedule
+%eop EOF
+%noshift EOF
+
+%name HecateSchedule
+
+%keyword TRAVERSAL CASE RECUR ITERATE LEFT RIGHT INTERFACE INPUT OUTPUT TINT TBOOL TSET CLASS CHILDREN RULES SELF IF THEN ELSE 
+
+%prefer THEN ELSE LPAREN
+
+%value ID ("bogus")
+%value BOOL (true)
+%value INT (1)
+
+%%
+schedule:
+  TRAVERSAL ID LBRACE cases RBRACE ((ID, cases))
+
+cases: ([])
+  | CASE ID LBRACE stmts RBRACE cases ((ID, stmts) :: cases)
+
+stmt:
+    EVAL path SEMICOLON (SStmt.Eval(path))
+  | ITERATE ID LBRACE stmts RBRACE (SStmt.Iterate(NONE, ID, stmts))
+  | ITERATE LBRACK LEFT RBRACK ID LBRACE stmts RBRACE (SStmt.Iterate(SOME(SStmt.Left), ID, stmts))
+  | ITERATE LBRACK RIGHT RBRACK ID LBRACE stmts RBRACE (SStmt.Iterate(SOME(SStmt.Right), ID, stmts))
+  | RECUR ID SEMICOLON (SStmt.Recur(ID))
+
+stmts: ([])
+  | stmt stmts (stmt :: stmts)
+
+path:
+    SELF DOT ID (Path.Dot(Path.Self, ID))
+  | ID DOT ID (Path.Dot(Path.Child(ID), ID2))
