@@ -1,0 +1,1 @@
+structure FOO = struct end

@@ -14,13 +14,13 @@ struct
 
   type symbol = string * int
 
-  structure H = HashTable
+  structure H = StringHashTable
 
   exception Symbol
   val nextsym = ref 0
   val sizeHint = 128
-  val hashtable : (string,int) H.hash_table = 
-                H.mkTable(HashString.hashString, op = ) (sizeHint,Symbol)
+  val hashtable : int H.hash_table = 
+                StringHashTable.mkTable(sizeHint,Symbol)
   
   fun symbol name =
       case H.find hashtable name

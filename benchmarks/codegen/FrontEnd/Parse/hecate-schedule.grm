@@ -78,5 +78,5 @@ stmts: ([])
   | stmt stmts (stmt :: stmts)
 
 path:
-    SELF DOT ID (Path.Dot(Path.Self, ID))
-  | ID DOT ID (Path.Dot(Path.Child(ID), ID2))
+    SELF DOT ID (Path.new(Path.Self, ID))
+  | ID DOT ID (Path.new(Path.Child(ID), ID2))

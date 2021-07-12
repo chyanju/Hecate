@@ -4,14 +4,28 @@ prelude.sml
 symbol.sml
 table.sig
 table.sml
+string-hash-table.sml
 
-FrontEnd/ast.sml
-FrontEnd/errormsg.sml
-FrontEnd/parse.sml
 
-FrontEnd/hecate.lex
-FrontEnd/hecate.grm
-FrontEnd/hecate-schedule.grm
+FrontEnd/Spec/ast.sml
+FrontEnd/Spec/class.sml
+FrontEnd/Spec/expr.sml
+FrontEnd/Spec/interface.sml
+FrontEnd/Spec/path.sml
+FrontEnd/Spec/schedule.sml
+FrontEnd/Spec/traversal.sml
+
+FrontEnd/Parse/hecate.lex
+FrontEnd/Parse/hecate.grm
+FrontEnd/Parse/hecate-schedule.grm
+FrontEnd/Parse/errormsg.sml
+FrontEnd/Parse/parse.sml
+
+
+CodeGen/optimize.sml
+CodeGen/resolve-eval.sml
+CodeGen/schedule.sml
+
 
 $/smlnj-lib.cm
 $/basis.cm

@@ -7,4 +7,6 @@ fun intercalate sep [] = ""
 val unwords = intercalate " "
 val join = intercalate "\n"
 
+fun id x = x
+
 end
