@@ -5,6 +5,7 @@ symbol.sml
 table.sig
 table.sml
 string-hash-table.sml
+main.sml
 
 
 FrontEnd/Spec/ast.sml
@@ -24,7 +25,8 @@ FrontEnd/Parse/parse.sml
 
 CodeGen/optimize.sml
 CodeGen/resolve-eval.sml
-CodeGen/schedule.sml
+CodeGen/sort-eval.sml
+CodeGen/code-gen.sml
 
 
 $/smlnj-lib.cm

@@ -9,4 +9,9 @@ val join = intercalate "\n"
 
 fun id x = x
 
+fun optToString NONE = ""
+  | optToString (SOME s) = s
+
+(* fun mergeTables (t1: ('a,'b) hash_table) (t2: ('a,'c) hash_table) : ('a, 'b * 'c) hash_table = *)
+
 end

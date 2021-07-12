@@ -6,7 +6,6 @@ structure IR_ResolveEval = struct
   (* IR Class *)
   structure IR_Class = struct
 
-    
     exception Child
     exception Rule
     
@@ -46,13 +45,26 @@ structure IR_ResolveEval = struct
     datatype t =
         Eval of Path.t * Expr.t
       | Recur of string
-      | Iterate of dir option * string * (t list)
+      | Iterate of dir option * string * (t list) (* TODO: make string -> Path.Child *)
 
-    fun toString (Eval (p,e)) = Path.toString p ^ " := " ^ Expr.toString e
+    fun toString (Eval(p,e)) = Path.toString p ^ " := " ^ Expr.toString e
       | toString (Iterate(NONE, on, b)) = "iterate " ^ on ^ " { " ^ Prelude.unwords(map toString b) ^ " }"
       | toString (Iterate(SOME(d), on, b)) = "iterate[" ^ SStmt.dirToString d ^ "] " ^ on ^ " { " ^ Prelude.unwords(map toString b) ^ " }"
       | toString (Recur(on)) = "recur " ^ on ^ ";"
-
+    
+    fun toCpp (Eval(p,e)) = Path.toCpp p ^ " = " ^ Expr.toCpp e ^ ";"
+      | toCpp (Iterate(_, on, ss)) = 
+        let val child = Path.locCpp(Path.Child(on))
+        in Format.format "if (%s != NULL) {\n%s\n}" (map Format.STR [
+          child, Prelude.join(map toCpp ss)
+        ])
+        end
+      | toCpp (Recur(on)) =
+        let val child = Path.locCpp(Path.Child(on))
+        in Format.format "if (%s != NULL) { %s->eval(); }" (map Format.STR [
+          child,
+          child])
+        end
     fun make (rules: Expr.t PathHT.hash_table) (s: SStmt.t) = case s of
         SStmt.Eval(p) => (case PathHT.find rules p of
           SOME e => Eval(p, e)
@@ -72,19 +84,31 @@ structure IR_ResolveEval = struct
   end (* IR_ScheduleCase *)
 
   structure IR_Schedule = struct
-    type t = string * (IR_ScheduleCase.t list)
+    type t = string * (IR_ScheduleCase.t StrHT.hash_table)
+
+    exception Case
     
-    fun toString (id, cs) = "traversal " ^ id ^ " {\n" ^ (Prelude.join(map IR_ScheduleCase.toString cs)) ^ "\n}\n"
+    fun toString (sch as (id, ct): t) =
+      Format.format "traversal %s {\n%s\n}\n" (map Format.STR [
+        id,
+        Prelude.join(map IR_ScheduleCase.toString (StrHT.listItems ct))
+      ])
 
     fun make (classes: IR_Class.t StrHT.hash_table) (sch: Schedule.t) : t =
-        let val (name, cases) = sch
-        in (name,
-            map (fn (c as (case_name, _)) =>
-              let val IR_Class.T{rules,...} = StrHT.lookup classes case_name
-              in IR_ScheduleCase.make rules c
-              end)
-            cases)
-        end
+      let
+        val (name, cases) = sch
+        val sizeHint = 128
+        val ct = StrHT.mkTable(sizeHint, Case)
+
+      in app (fn (c as (case_name, _)) =>
+        let
+          val IR_Class.T{rules, ...} = StrHT.lookup classes case_name
+          val ir_case = IR_ScheduleCase.make rules c
+        in
+          StrHT.insert ct (case_name, ir_case)
+        end) cases;
+        (name, ct)
+      end
   end (* IR_Schedule *)
 
   structure IR_Interface = struct

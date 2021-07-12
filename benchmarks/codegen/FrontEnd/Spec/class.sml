@@ -4,8 +4,12 @@ structure CType = struct
   datatype t =
       Interface of string
     | List of string
+  
   fun toString (Interface itf) = itf
     | toString (List itf) = "[" ^ itf ^ "]"
+  
+  fun toCpp (Interface itf) = itf ^ "*"
+    | toCpp (List itf) = itf ^ "*"
 end
 
 structure Child = struct

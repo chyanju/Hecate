@@ -8,6 +8,8 @@ structure Binop = struct
     | toString Divide = "/"
     | toString And = "&&"
     | toString Or = "||"
+  
+  val toCpp = toString
 end
 
 structure Binrel = struct
@@ -18,11 +20,13 @@ structure Binrel = struct
     | toString GE = ">="
     | toString LT = "<"
     | toString LE = "<="
+  val toCpp = toString
 end
 
 structure Unop = struct
   datatype t = Not
   fun toString Not = "!"
+  val toCpp = toString
 end
 
 structure Expr = struct
@@ -49,4 +53,17 @@ structure Expr = struct
     | toString (Hack(i, p, default)) = Format.format "[%s]{ %s : %s }" (map Format.STR [Int.toString i, Path.toString p, toString default])
     | toString (Call(f, [])) = f ^ "()"
     | toString (Call(f, es)) = f ^ "(" ^ Prelude.intercalate ", " (map toString es) ^ ")"
+
+  fun toCpp Null = "NULL_VAL"
+    | toCpp (Bool true) = "true"
+    | toCpp (Bool false) = "false"
+    | toCpp (Int n) = Int.toString n
+    | toCpp (Unop(oper, e)) = Format.format "%s(%s)" (map Format.STR [Unop.toCpp oper, toCpp e])
+    | toCpp (Binop(oper, e1, e2)) = Format.format "(%s) %s (%s)" (map Format.STR [toCpp e1, Binop.toCpp oper, toCpp e2])
+    | toCpp (Binrel(rel, e1, e2)) = Format.format "(%s) %s (%s)" (map Format.STR [toCpp e1, Binrel.toCpp rel, toCpp e2])
+    | toCpp (If(ec, et, ef)) = Format.format "(%s) ? (%s) : (%s)" (map Format.STR (map toCpp [ec, et, ef]))
+    | toCpp (Path p) = Path.toCpp p
+    | toCpp (Hack(i, p, default)) = Format.format "(%s != NULL) ? (%s) : (%s)" (map Format.STR [Path.locCpp(Path.loc(p)), Path.toCpp p, toCpp default])
+    | toCpp (Call(f, [])) = f ^ "()"
+    | toCpp (Call(f, es)) = f ^ "(" ^ Prelude.intercalate ", " (map toCpp es) ^ ")"
 end

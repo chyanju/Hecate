@@ -11,6 +11,8 @@ sig
   val loc: t -> location
   val field: t -> field 
   val toString : t -> string
+  val locCpp: location -> string
+  val toCpp: t -> string
   structure Table : MONO_HASH_TABLE where
     type Key.hash_key = t
 end
@@ -26,6 +28,12 @@ structure Path :> PATH = struct
     | toString' (Child(c), f) = c ^ "." ^ f
 
   fun toString (p,_) = toString' p
+
+  fun locCpp Self = "this"
+    | locCpp (Child(c)) = "this->" ^ c
+
+  fun toCpp ((Self, f), _) = "this->" ^ f
+    | toCpp ((Child(c), f), _) = "this->" ^ c ^ "->" ^ f
 
   fun new (p as (loc, f)) =
     (p, HashString.hashString (toString' p))
