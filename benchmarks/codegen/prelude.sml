@@ -12,6 +12,7 @@ fun id x = x
 fun optToString NONE = ""
   | optToString (SOME s) = s
 
+fun concatMap f xxs = List.concat (List.map f xxs)
 (* fun mergeTables (t1: ('a,'b) hash_table) (t2: ('a,'c) hash_table) : ('a, 'b * 'c) hash_table = *)
 
 end

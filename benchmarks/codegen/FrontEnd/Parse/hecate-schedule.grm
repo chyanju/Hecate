@@ -19,6 +19,7 @@
   | CHILDREN
   | RULES
   | SELF
+  | OPTION
   | ASSIGN
   | DOT
   | IF | THEN | ELSE

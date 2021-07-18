@@ -1,21 +1,28 @@
 structure IR_SortEval = struct
-  
-  structure StrHT = StringHashTable
-  structure PathHT = Path.Table
-  structure Prev = IR_ResolveEval (* previous phase *)
+
+  (* previous phase *)
+  structure Prev = IR_ResolveEval
+  (* inherit IR structures *)
+  structure IR_Class = Prev.IR_Class
+  structure IR_ScheduleCase = Prev.IR_ScheduleCase
+  structure IR_Schedule = Prev.IR_Schedule
+  structure IR_Interface = Prev.IR_Interface
+  structure IR_SStmt = Prev.IR_SStmt
 
   type 'a ht = 'a StrHT.hash_table
 
+  (* new IR structures: IR_Class *)
   structure IR_Class = struct 
+
     type t =
-      Prev.IR_Class.t (* {name, interface, children, rules *)
-      * Prev.IR_ScheduleCase.t (* string * (Prev.IR_SStmt.t list) *)
+      IR_Class.t (* {name, interface, children, rules *)
+      * IR_ScheduleCase.t (* string * (Prev.IR_SStmt.t list) *)
 
     exception Class
     
     fun make
-      (classes: Prev.IR_Class.t StrHT.hash_table)
-      ((_, cases): Prev.IR_Schedule.t)
+      (classes: IR_Class.t StrHT.hash_table)
+      ((_, cases): IR_Schedule.t)
       : t StrHT.hash_table =
       let
         val sizeHint = 128
@@ -29,12 +36,10 @@ structure IR_SortEval = struct
       end
     
     fun toString ((class, plan) : t) =
-      Prev.IR_Class.toString class ^
-      "// plan\n" ^ Prev.IR_ScheduleCase.toString plan ^ "\n"
+      IR_Class.toString class ^
+      "// plan\n" ^ IR_ScheduleCase.toString plan ^ "\n"
   end
 
-  structure IR_Interface = Prev.IR_Interface
-  structure IR_Schedule = Prev.IR_Schedule
 
   datatype t = T of {
     interfaces: IR_Interface.t StrHT.hash_table,

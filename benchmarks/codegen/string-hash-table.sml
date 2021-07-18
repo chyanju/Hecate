@@ -4,3 +4,5 @@ structure StringHashTable :> MONO_HASH_TABLE
     type hash_key=string
     val hashVal = HashString.hashString
     val sameKey = op =)
+
+structure StrHT = StringHashTable

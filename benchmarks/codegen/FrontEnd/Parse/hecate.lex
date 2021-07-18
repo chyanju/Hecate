@@ -39,6 +39,7 @@ letter=[A-Za-z];
 <INITIAL>"children"    => (Tokens.CHILDREN(yypos, yypos + size yytext));
 <INITIAL>"rules"       => (Tokens.RULES(yypos, yypos + size yytext));
 <INITIAL>"self"        => (Tokens.SELF(yypos, yypos + size yytext));
+<INITIAL>"Option"      => (Tokens.OPTION(yypos, yypos + size yytext));
 
 <INITIAL>":=" => (Tokens.ASSIGN(yypos, yypos + size yytext));
 <INITIAL>"." => (Tokens.DOT(yypos, yypos + size yytext));

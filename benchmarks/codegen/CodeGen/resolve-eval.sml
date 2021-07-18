@@ -1,8 +1,4 @@
 structure IR_ResolveEval = struct
-  
-  structure StrHT = StringHashTable
-  structure PathHT = Path.Table
-  
   (* IR Class *)
   structure IR_Class = struct
 
@@ -51,20 +47,7 @@ structure IR_ResolveEval = struct
       | toString (Iterate(NONE, on, b)) = "iterate " ^ on ^ " { " ^ Prelude.unwords(map toString b) ^ " }"
       | toString (Iterate(SOME(d), on, b)) = "iterate[" ^ SStmt.dirToString d ^ "] " ^ on ^ " { " ^ Prelude.unwords(map toString b) ^ " }"
       | toString (Recur(on)) = "recur " ^ on ^ ";"
-    
-    fun toCpp (Eval(p,e)) = Path.toCpp p ^ " = " ^ Expr.toCpp e ^ ";"
-      | toCpp (Iterate(_, on, ss)) = 
-        let val child = Path.locCpp(Path.Child(on))
-        in Format.format "if (%s != NULL) {\n%s\n}" (map Format.STR [
-          child, Prelude.join(map toCpp ss)
-        ])
-        end
-      | toCpp (Recur(on)) =
-        let val child = Path.locCpp(Path.Child(on))
-        in Format.format "if (%s != NULL) { %s->eval(); }" (map Format.STR [
-          child,
-          child])
-        end
+
     fun make (rules: Expr.t PathHT.hash_table) (s: SStmt.t) = case s of
         SStmt.Eval(p) => (case PathHT.find rules p of
           SOME e => Eval(p, e)
@@ -112,8 +95,7 @@ structure IR_ResolveEval = struct
   end (* IR_Schedule *)
 
   structure IR_Interface = struct
-    type t = Interface.t
-    val toString = Interface.toString
+    open Interface
     val make = Prelude.id
   end
 

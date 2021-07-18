@@ -10,6 +10,7 @@ main.sml
 
 FrontEnd/Spec/ast.sml
 FrontEnd/Spec/class.sml
+FrontEnd/Spec/ctype.sml
 FrontEnd/Spec/expr.sml
 FrontEnd/Spec/interface.sml
 FrontEnd/Spec/path.sml

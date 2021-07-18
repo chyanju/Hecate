@@ -19,6 +19,7 @@
   | CHILDREN
   | RULES
   | SELF
+  | OPTION
   | ASSIGN
   | DOT
   | IF | THEN | ELSE
@@ -118,6 +119,7 @@ typ:
     TINT (Type.Int)
   | TBOOL (Type.Bool)
   | TSET (Type.Set)
+  | ID (Type.Custom(ID))
 
 groups:
     ([])
@@ -140,6 +142,7 @@ children:
 ctyp:
     ID (CType.Interface(ID))
   | LBRACK ID RBRACK (CType.List(ID))
+  | OPTION LT ID GT (CType.Option(ID))
 
 rules:
     ([])

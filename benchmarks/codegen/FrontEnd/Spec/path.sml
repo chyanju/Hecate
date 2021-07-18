@@ -11,13 +11,13 @@ sig
   val loc: t -> location
   val field: t -> field 
   val toString : t -> string
-  val locCpp: location -> string
-  val toCpp: t -> string
+  val locCpp: CType.t StringHashTable.hash_table -> location -> string
+  val toCpp: CType.t StringHashTable.hash_table -> t -> string
   structure Table : MONO_HASH_TABLE where
     type Key.hash_key = t
 end
 
-structure Path :> PATH = struct
+structure Path : PATH = struct
   exception Path
   
   datatype location = Self | Child of string
@@ -29,11 +29,12 @@ structure Path :> PATH = struct
 
   fun toString (p,_) = toString' p
 
-  fun locCpp Self = "this"
-    | locCpp (Child(c)) = "this->" ^ c
+  fun locCpp children Self = "this"
+    | locCpp children (Child(c)) = case StringHashTable.lookup children c of
+        CType.List _ => c
+      | _ => "this->" ^ c
 
-  fun toCpp ((Self, f), _) = "this->" ^ f
-    | toCpp ((Child(c), f), _) = "this->" ^ c ^ "->" ^ f
+  fun toCpp children ((l, f), _) = locCpp children l ^ "->" ^  f
 
   fun new (p as (loc, f)) =
     (p, HashString.hashString (toString' p))
@@ -50,3 +51,5 @@ structure Path :> PATH = struct
     )
   
 end
+
+structure PathHT = Path.Table

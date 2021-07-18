@@ -2,6 +2,7 @@
 
 ## Requirements
 - [SML/NJ](https://www.smlnj.org/) 110.99
+- `clang-format`
   
 ## Usage
 Compile with
@@ -12,8 +13,8 @@ Run with
 
     sml @SMLload codegen.[platform] GRAMMAR_FILE CONCRETE_SCHEDULE
 
-During debugging, run with
+During development/debugging, run with
 
-    sml test.sml GRAMMAR_FILE CONCRETE_SCHEDULE
+    ./run GRAMMAR_FILE CONCRETE_SCHEDULE OUTPUT_FILE
 
-to avoid recompilation.
+to force recompilation.
