@@ -15,6 +15,7 @@
   | TINT
   | TBOOL
   | TSET
+  | TVECTOR
   | CLASS
   | CHILDREN
   | RULES

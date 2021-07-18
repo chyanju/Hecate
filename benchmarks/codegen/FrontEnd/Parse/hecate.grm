@@ -20,6 +20,7 @@
   | RULES
   | SELF
   | OPTION
+  | TVECTOR
   | ASSIGN
   | DOT
   | IF | THEN | ELSE
@@ -120,6 +121,7 @@ typ:
   | TBOOL (Type.Bool)
   | TSET (Type.Set)
   | ID (Type.Custom(ID))
+  | TVECTOR LT ID GT (Type.Vector(ID))
 
 groups:
     ([])

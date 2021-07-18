@@ -35,6 +35,7 @@ letter=[A-Za-z];
 <INITIAL>"int"       => (Tokens.TINT(yypos, yypos + size yytext));
 <INITIAL>"bool"      => (Tokens.TBOOL(yypos, yypos + size yytext));
 <INITIAL>"set"       => (Tokens.TSET(yypos, yypos + size yytext));
+<INITIAL>"vector"       => (Tokens.TVECTOR(yypos, yypos + size yytext));
 <INITIAL>"class"     => (Tokens.CLASS(yypos, yypos + size yytext));
 <INITIAL>"children"    => (Tokens.CHILDREN(yypos, yypos + size yytext));
 <INITIAL>"rules"       => (Tokens.RULES(yypos, yypos + size yytext));

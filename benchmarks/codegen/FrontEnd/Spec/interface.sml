@@ -7,11 +7,12 @@ structure InOut = struct
 end
 
 structure Type = struct
-  datatype t = Int | Bool | Set | Custom of string
+  datatype t = Int | Bool | Set | Custom of string | Vector of string
   fun toString Int = "int"
     | toString Bool = "bool"
     | toString Set = "set"
     | toString (Custom t) = t
+    | toString (Vector t) = "vector<" ^ t ^ ">"
 end
 
 structure Field = struct

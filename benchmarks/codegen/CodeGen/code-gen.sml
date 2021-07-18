@@ -171,6 +171,7 @@ structure CodeGen = struct
       val s2 = List.concat(map Class_Cpp.toCpp class_lst)
     in
       app (fn f => stdErr (Format.format "uninterpreted: %s\n" [Format.STR f])) uninterpreted_lst;
-      Prelude.intercalate "\n\n" (header @ unionCpp @ s1 @ s2)
+      Prelude.intercalate "\n\n" (map Prelude.join(
+        [header, unionCpp, s1, s2]))
     end
 end
