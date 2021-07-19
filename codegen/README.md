@@ -17,9 +17,7 @@ Run with
 
 During development/debugging, run with
 
-    ./run GRAMMAR_FILE CONCRETE_SCHEDULE OUTPUT_FILE
-
-to force recompilation.
+    ./run GRAMMAR_FILE CONCRETE_SCHEDULE
 
 
 ## Tests
@@ -27,8 +25,6 @@ to force recompilation.
 ### FMM
     # Generate concrete schedule using fmm.grammar
     (cd ..; ./run.rkt --root VirtualRoot fuse codegen/tests/fmm/fmm.grammar)
-    # Please manually copy the concrete schedule into codegen/tests/fmm/fmm.grammar
+    # Please manually copy the concrete schedule into codegen/tests/fmm/fmm.sch
     # Run code-gen with augmented grammar and concrete schedule
     ./run tests/fmm/fmm.grammar-aug tests/fmm/fmm.sch > tests/fmm/fmm.h
-
-The generated program is `tests/fmm.h`.
