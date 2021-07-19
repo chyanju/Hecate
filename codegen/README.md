@@ -1,9 +1,11 @@
 # Codegen
 
+
 ## Requirements
 - [SML/NJ](https://www.smlnj.org/) 110.99
 - `clang-format`
   
+
 ## Usage
 Compile with
     
@@ -18,3 +20,15 @@ During development/debugging, run with
     ./run GRAMMAR_FILE CONCRETE_SCHEDULE OUTPUT_FILE
 
 to force recompilation.
+
+
+## Tests
+
+### FMM
+    # Generate concrete schedule using fmm.grammar
+    (cd ..; ./run.rkt --root VirtualRoot fuse codegen/tests/fmm/fmm.grammar)
+    # Please manually copy the concrete schedule into codegen/tests/fmm/fmm.grammar
+    # Run code-gen with augmented grammar and concrete schedule
+    ./run tests/fmm/fmm.grammar-aug tests/fmm/fmm.sch > tests/fmm/fmm.h
+
+The generated program is `tests/fmm.h`.

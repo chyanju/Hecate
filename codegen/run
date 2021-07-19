@@ -1,10 +1,10 @@
+#!/bin/bash
 
 grammar=$1
 sch=$2
-output=$3
 
 ml-build sources.cm Main.main codegen
 echo $grammar
 echo $sch
 echo $output
-sml @SMLload codegen.amd64-darwin $grammar $sch | clang-format >  "$output"
+sml @SMLload codegen.amd64-darwin $grammar $sch | clang-format

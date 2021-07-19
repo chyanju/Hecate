@@ -1,0 +1,105 @@
+// JR
+// Supply this file to the code generator
+// Augmentations:
+// - Replaced 0/1 list with Option<...>
+
+traversal fuse {
+    case CVirtualRoot {
+        ??;
+        recur root;
+    }
+    case CVertex {
+        ??;
+        iterate c1 { ??; recur c1; }
+        iterate c2 { ??; recur c2; }
+        iterate c3 { ??; recur c3; }
+        iterate c4 { ??; recur c4; }
+        recur point;
+    }
+    case PointList {
+        iterate next { ??; recur next; }
+    }
+}
+
+interface VirtualRoot {
+}
+
+class CVirtualRoot : VirtualRoot {
+    children { 
+        root : Vertex; 
+    }
+    rules {
+        // parentPotential base case is initialized to 0
+        root.parentPotential := 0;
+    }
+}
+
+interface Vertex {
+    input box_startX : int;
+    input box_startY : int;
+    input box_endX : int;
+    input box_endY : int;
+
+    output parentPotential : int;
+    output interactionList : vector<Vertex>;
+
+    output x1 : int;
+    output y1 : int;
+}
+
+class CVertex : Vertex {
+    children {
+        c1 : Option<Vertex>;
+        c2 : Option<Vertex>;
+        c3 : Option<Vertex>;
+        c4 : Option<Vertex>;
+        // (notice) first point represents this vertex
+        // the "next" of point represents a head of a list of points if the current vertex is leaf
+        point : Point;
+    }
+    rules {
+        self.x1 := ( self.box_startX + self.box_endX ) / 2;
+        self.y1 := ( self.box_startY + self.box_endY ) / 2;
+
+        point.potential := 
+            0 + getPotential(
+                self.x1, self.y1,
+                point.mass,
+                self.interactionList
+            );
+
+        point.finalPotential := point.potential + self.parentPotential;
+        point.basePotential := point.finalPotential;
+
+        c1.parentPotential := point.finalPotential;
+        c2.parentPotential := point.finalPotential;
+        c3.parentPotential := point.finalPotential;
+        c4.parentPotential := point.finalPotential;
+
+        // (notice) depend on self **inputs** (not outputs), no need to provide arguments
+        // (notice) according to FMM, interaction list will not include children (does not overlap with children list)
+        self.interactionList := getInteractionList(); 
+    }
+}
+
+interface Point {
+    input mass : int;
+    input coordX : int;
+    input coordY : int;
+
+    output potential : int;
+    output finalPotential : int;
+    output basePotential : int;
+}
+class PointList : Point {
+    children {
+        // only leaf vertex has non-empty next list
+        next : Option<Point>;
+    }
+    rules {
+        // potential base case is 0, see main.cpp:698
+        next.potential := 0;
+        next.basePotential := self.basePotential;
+        next.finalPotential := next.potential + self.basePotential;
+    }
+}
