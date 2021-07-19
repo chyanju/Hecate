@@ -17,7 +17,7 @@ Run with
 
 During development/debugging, run with
 
-    ./run GRAMMAR_FILE CONCRETE_SCHEDULE
+    ./run GRAMMAR_FILE CONCRETE_SCHEDULE OUTPUT_FILE
 
 
 ## Tests
@@ -27,4 +27,4 @@ During development/debugging, run with
     (cd ..; ./run.rkt --root VirtualRoot fuse codegen/tests/fmm/fmm.grammar)
     # Please manually copy the concrete schedule into codegen/tests/fmm/fmm.sch
     # Run code-gen with augmented grammar and concrete schedule
-    ./run tests/fmm/fmm.grammar-aug tests/fmm/fmm.sch > tests/fmm/fmm.h
+    ./run tests/fmm/fmm.grammar-aug tests/fmm/fmm.sch tests/fmm/fmm.h
