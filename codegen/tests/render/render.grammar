@@ -1,0 +1,460 @@
+// 1. setFont
+// 2. resolveFlexWidths
+// 3. resolveRelativeWidths
+// 4. computeHeights
+// 5. setPositions
+// run with: run.rkt --root Document fuse codegen/tests/render/render.grammar
+
+
+traversal fuse {
+    case CDocument {
+        ??;
+        iterate PageList { ??; recur PageList; ??; }
+        ??;
+    }
+    case CPage {
+        ??;
+        iterate HorizList { ??; recur HorizList; ??; }
+        ??;
+        iterate Next { ??; recur Next; ??; }
+        ??;
+    }
+    case CHorizontalContainer {
+        ??;
+        iterate ElementList { ??; recur ElementList; ??; }
+        ??;
+        iterate Next { ??; recur Next; ??; }
+        ??;
+    }
+    case CNormalElement {
+        ??;
+        iterate Next { ??; recur Next; ??; }
+        ??;
+    }
+    case CVerticalContainer {
+        ??;
+        iterate HorizList { ??; recur HorizList; ??; }
+        ??;
+        iterate Next { ??; recur Next; ??; }
+        ??;
+    }
+}
+
+// ============================= //
+// ========== Program ========== //
+// ============================= //
+
+interface Document {
+    // model arguments to PageList.setFont
+    input FontStyle.Size : int;
+    input FontStyle.Color : int;
+    input FontStyle.Type : int;
+}
+class CDocument : Document {
+    children {
+        PageList : [Page]; // 0 or 1
+    }
+    rules {
+        PageList.ParentFontStyle.Size := self.FontStyle.Size;
+        PageList.ParentFontStyle.Color := self.FontStyle.Color;
+        PageList.ParentFontStyle.Type := self.FontStyle.Type;
+    }
+}
+
+interface Page {
+    // setFont
+    input FontStyle0.Size : int;
+    input FontStyle0.Color : int;
+    input FontStyle0.Type : int;
+    output FontStyle1.Size : int;
+    output FontStyle1.Color : int;
+    output FontStyle1.Type : int;
+    // args
+    output ParentFontStyle.Size : int;
+    output ParentFontStyle.Color : int;
+    output ParentFontStyle.Type : int;
+    
+    // resolveFlexWidths
+    input Width0 : int;
+    input WMode0 : int;
+    output WidthFlex : int;
+    
+    // resolveRelativeWidths
+    input RelWidth0 : int;
+    output Width : int;
+
+     // computeHeights
+    output Height1 : int;
+    
+    // setPositions
+    output PosX : int;
+    output PosY : int;
+}
+class CPage : Page {
+    children {
+        HorizList : [HorizontalContainer]; // 0 or 1
+        Next : [Page]; // 0 or 1
+    }
+    rules {
+        // 1. setFont
+        self.FontStyle1.Size :=
+            if self.FontStyle0.Size == 0 - 1 then
+                self.ParentFontStyle.Size
+            else
+                self.FontStyle0.Size;
+        self.FontStyle1.Color :=
+            if self.FontStyle0.Color == 0 - 1 then
+                self.ParentFontStyle.Color
+            else
+                self.FontStyle0.Color;
+        self.FontStyle1.Type :=
+            if self.FontStyle0.Type == 0 - 1 then
+                self.ParentFontStyle.Type
+            else
+                self.FontStyle0.Type;
+        
+        // pass function parameters rightwards
+        Next.ParentFontStyle.Size := self.ParentFontStyle.Size;
+        Next.ParentFontStyle.Color := self.ParentFontStyle.Color;
+        Next.ParentFontStyle.Type := self.ParentFontStyle.Type;
+        // pass function parameters downwards
+        HorizList.ParentFontStyle.Size := self.FontStyle1.Size;
+        HorizList.ParentFontStyle.Color := self.FontStyle1.Color;
+        HorizList.ParentFontStyle.Type := self.FontStyle1.Type;
+
+        // 2. resolveFlexWidths
+        self.WidthFlex := [0]{ HorizList.MaxWidth : panic() };
+        
+        // 3. resolveRelativeWidths
+        // pass downwards
+        HorizList.PWidth :=
+            if isFLEX(self.WMode0) then
+                circular() // circular dependency
+            else if isREL(self.WMode0) then
+                panic() // Page cannot be in relative width mode
+            else // absolute
+                self.Width0;
+        
+        self.Width :=
+            if isFLEX(self.WMode0) then
+                self.WidthFlex
+            else if isREL(self.WMode0) then
+                panic() // Page cannot be in relative width mode
+            else
+                self.Width0;
+
+        // 4. computeHeights:
+        self.Height1 := [0]{ HorizList.AggregatedHeight : panic() };
+        
+        // 5. setPositions
+        self.PosX := 0;
+        self.PosY := 0;
+        // pass downwards
+        HorizList.CurrX := self.PosX;
+        HorizList.CurrY := self.PosY;
+    }
+}
+
+interface HorizontalContainer {
+    // setFont
+    input FontStyle0.Size : int;
+    input FontStyle0.Color : int;
+    input FontStyle0.Type : int;
+    output FontStyle1.Size : int;
+    output FontStyle1.Color : int;
+    output FontStyle1.Type : int;
+    // args
+    output ParentFontStyle.Size : int; 
+    output ParentFontStyle.Color : int;
+    output ParentFontStyle.Type : int;
+
+    // resolveFlexWidths
+    input Width0 : int;
+    input WMode0 : int;
+    output MaxWidth : int; 
+    output Width1 : int;
+    
+    // resolveRelativeWidths
+    input RelWidth0 : int;
+    output Width2 : int;
+    // args
+    output PWidth : int;
+    
+    // computeHeights
+    output Height1 : int;
+    output AggregatedHeight : int;
+
+    // setPositions
+    output PosX : int;
+    output PosY : int;
+    // args
+    output CurrX : int;
+    output CurrY : int;
+}
+class CHorizontalContainer : HorizontalContainer {
+    children {
+        ElementList : [Element]; // 0 or 1
+        Next : [HorizontalContainer]; // 0 or 1
+    }
+    rules {
+        // 1. setFont
+        self.FontStyle1.Size :=
+            if self.FontStyle0.Size == 0 - 1 then
+                self.ParentFontStyle.Size
+            else
+                self.FontStyle0.Size;
+        self.FontStyle1.Color :=
+            if self.FontStyle0.Color == 0 - 1 then
+                self.ParentFontStyle.Color
+            else
+                self.FontStyle0.Color;
+        self.FontStyle1.Type :=
+            if self.FontStyle0.Type == 0 - 1 then
+                self.ParentFontStyle.Type
+            else
+                self.FontStyle0.Type;
+        // pass rightwards
+        Next.ParentFontStyle.Size := self.ParentFontStyle.Size;
+        Next.ParentFontStyle.Color := self.ParentFontStyle.Color;
+        Next.ParentFontStyle.Type := self.ParentFontStyle.Type;
+        // pass downwards
+        ElementList.ParentFontStyle.Size := self.FontStyle1.Size;
+        ElementList.ParentFontStyle.Color := self.FontStyle1.Color;
+        ElementList.ParentFontStyle.Type := self.FontStyle1.Type;
+        
+        // 2. resolveFlexWidths
+        self.Width1 :=
+            if isFLEX(self.WMode0) then
+                [0]{ ElementList.AccumulatedWidth : panic() }
+            else
+                self.Width0;
+        
+        self.MaxWidth := 
+            if self.Width1 > [0]{ Next.MaxWidth : default() } then
+                self.Width1
+            else
+                [0]{ Next.MaxWidth : default() };
+        
+        // 3. resolveRelativeWidths
+        // self.WidthRel := self.RelWidth0 * self.PWidth;
+        self.Width2 := 
+            if isREL(self.WMode0) then
+                // self.WidthRel
+                self.RelWidth0 * self.PWidth
+            else
+                self.Width1;
+        // pass rightwards
+        Next.PWidth := self.PWidth;
+        // pass downwards
+        ElementList.PWidth :=
+            if isFLEX(self.WMode0) then
+                circular() // circular dependency
+            else if isREL(self.WMode0) then
+                // self.WidthRel
+                self.RelWidth0 * self.PWidth
+            else // absolute
+                self.Width0;
+        
+        // 4. computeHeights
+        self.Height1 := [0]{ ElementList.MaxHeight : panic() };
+        self.AggregatedHeight := self.Height1 + [0]{ Next.AggregatedHeight : default() };
+        
+        // 5. setPositions
+        self.PosX := self.CurrX;
+        self.PosY := self.CurrY;
+        // pass rightwards
+        Next.CurrX := self.CurrX;
+        Next.CurrY := self.CurrY + self.Height1;
+        // pass downwards
+        ElementList.CurrX := self.CurrX;
+        ElementList.CurrY := self.CurrY;
+    }
+}
+
+interface Element {
+    // setFont
+    input FontStyle0.Size : int;
+    input FontStyle0.Color : int;
+    input FontStyle0.Type : int;
+    output FontStyle1.Size : int;
+    output FontStyle1.Color : int;
+    output FontStyle1.Type : int;
+    // args
+    output ParentFontStyle.Size : int;
+    output ParentFontStyle.Color : int;
+    output ParentFontStyle.Type : int;
+    
+    // resolveFlexWidths
+    input RelWidth0 : int;
+    input Width0 : int;
+    input WMode0 : int;
+    output Width1 : int; 
+    output AccumulatedWidth : int;
+    
+    // resolveRelativeWidths
+    // output WidthRel: int;
+    output Width2 : int;
+    // args
+    output PWidth : int;
+    
+    // computeHeights
+    input ElementType : int;
+    output Height1 : int;
+    output MaxHeight : int;
+    
+    // setPositions
+    output PosX : int;
+    output PosY : int;
+    // args
+    output CurrX : int; 
+    output CurrY : int;
+}
+class CNormalElement : Element {
+    children {
+        Next : [Element]; // 0 or 1
+    }
+    rules {
+        // 1. setFont
+        self.FontStyle1.Size :=
+            if self.FontStyle0.Size == 0 - 1 then
+                self.ParentFontStyle.Size
+            else
+                self.FontStyle0.Size;
+        self.FontStyle1.Color :=
+            if self.FontStyle0.Color == 0 - 1 then
+                self.ParentFontStyle.Color
+            else
+                self.FontStyle0.Color;
+        self.FontStyle1.Type :=
+            if self.FontStyle0.Type == 0 - 1 then
+                self.ParentFontStyle.Type
+            else
+                self.FontStyle0.Type;
+        
+        // pass rightwards
+        Next.ParentFontStyle.Size := self.ParentFontStyle.Size;
+        Next.ParentFontStyle.Color := self.ParentFontStyle.Color;
+        Next.ParentFontStyle.Type := self.ParentFontStyle.Type;
+
+        // 2. resolveFlexWidths
+        self.Width1 :=
+            if isFLEX(self.WMode0) then
+                panic()
+            else
+                self.Width0;
+        self.AccumulatedWidth := self.Width1 + [0]{ Next.AccumulatedWidth : default() };
+        
+
+        // 3. resolveRelativeWidths
+        // self.WidthRel := self.RelWidth0 * self.PWidth;
+        self.Width2 := 
+            if isREL(self.WMode0) then
+                // self.WidthRel
+                self.RelWidth0 * self.PWidth
+            else
+                self.Width1;
+        // pass rightwards
+        Next.PWidth := self.PWidth;
+
+        // 4. computeHeights
+        self.MaxHeight :=
+            if self.Height1 >= [0]{ Next.MaxHeight : default() } then
+                self.Height1
+            else
+                [0]{ Next.MaxHeight : default() };
+        self.Height1 :=
+            if isTextBox(self.ElementType) then
+                computeHeights4TextBox( self.FontStyle1.Size, self.Width2 )
+            else if isList(self.ElementType) then
+                computeHeights4List( self.FontStyle1.Size, self.Width2 )
+            else if isImage(self.ElementType) then
+                computeHeights4Image( self.Width2 )
+            else
+                default();
+        
+        // 5. setPositions
+        self.PosX := self.CurrX;
+        self.PosY := self.CurrY;
+        // pass rightwards
+        Next.CurrX := self.CurrX + self.Width2;
+        Next.CurrY := self.CurrY;
+    }
+}
+class CVerticalContainer : Element {
+    children {
+        HorizList : [HorizontalContainer]; // exclusive for CVerticalContainer
+        Next : [Element]; // 0 or 1
+    }
+    rules {
+        // 1. setFont
+        self.FontStyle1.Size :=
+            if self.FontStyle0.Size == 0 - 1 then
+                self.ParentFontStyle.Size
+            else
+                self.FontStyle0.Size;
+        self.FontStyle1.Color :=
+            if self.FontStyle0.Color == 0 - 1 then
+                self.ParentFontStyle.Color
+            else
+                self.FontStyle0.Color;
+        self.FontStyle1.Type :=
+            if self.FontStyle0.Type == 0 - 1 then
+                self.ParentFontStyle.Type
+            else
+                self.FontStyle0.Type;
+        // pass rightwards
+        Next.ParentFontStyle.Size := self.ParentFontStyle.Size;
+        Next.ParentFontStyle.Color := self.ParentFontStyle.Color;
+        Next.ParentFontStyle.Type := self.ParentFontStyle.Type;
+        // pass downwards
+        HorizList.ParentFontStyle.Size := self.FontStyle1.Size;
+        HorizList.ParentFontStyle.Color := self.FontStyle1.Color;
+        HorizList.ParentFontStyle.Type := self.FontStyle1.Type;
+
+        // 2. resolveFlexWidths
+        self.Width1 :=
+            if isFLEX(self.WMode0) then
+                [0]{ HorizList.MaxWidth : panic() }
+            else
+                self.Width0;
+        self.AccumulatedWidth := self.Width1 + [0]{ Next.AccumulatedWidth : default() };
+        
+        // 3. resolveRelativeWidths
+        // self.WidthRel := self.RelWidth0 * self.PWidth;
+        self.Width2 := 
+            if isREL(self.WMode0) then
+                // self.WidthRel
+                self.RelWidth0 * self.PWidth
+            else
+                self.Width1;
+        // pass rightwards
+        Next.PWidth := self.PWidth;
+        // pass downwards
+        HorizList.PWidth :=        
+            if isFLEX(self.WMode0) then
+                circular() // circular dependency
+            else if isREL(self.WMode0) then
+                // self.WidthRel
+                self.RelWidth0 * self.PWidth
+            else // absolute
+                self.Width0;
+        
+        // 4. computeHeights
+        self.MaxHeight :=
+            if self.Height1 >= [0]{ Next.MaxHeight : default() } then
+                self.Height1
+            else
+                [0]{ Next.MaxHeight : default() };
+        self.Height1 := [0]{ HorizList.AggregatedHeight : panic() };
+        
+        // 5. setPositions
+        self.PosX := self.CurrX;
+        self.PosY := self.CurrY;
+        // pass rightwards
+        Next.CurrX := self.CurrX + self.Width2;
+        Next.CurrY := self.CurrY;
+        // pass downwards
+        HorizList.CurrX := self.CurrX;
+        HorizList.CurrY := self.CurrY;
+    }
+}
