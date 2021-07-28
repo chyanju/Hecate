@@ -1,0 +1,277 @@
+// run with: run.rkt --root Document fuse codegen/tests/render/render-list.grammar
+
+traversal fuse {
+    case CDocument {
+        ??;
+        iterate PageList { ??; recur PageList; ??; }
+        ??;
+    }
+    case CPage {
+        ??;
+        iterate HorizList { ??; recur HorizList; ??; }
+        ??;
+    }
+    case CHorizontalContainer {
+        ??;
+        iterate ElementList { ??; recur ElementList; ??; }
+        ??;
+    }
+    case CNormalElement {
+        ??;
+    }
+    case CVerticalContainer {
+        ??;
+        iterate HorizList { ??; recur HorizList; ??; }
+        ??;
+    }
+}
+
+trait Horizontal {
+  rules {
+    // setFont
+    HorizList.ParentFontStyle := self.FontStyle1;
+    
+    // resolveRelative
+    HorizList.PWidth := self.Width;
+    
+    // computeHeight
+    self.AggregatedHeight := foldl 0 .. @{self.AggregatedHeight} + HorizList.Height;
+    self.Height := self.AggregatedHeight;
+    
+    // setPositions
+    self.CurrX := self.PosX;
+    self.CurrY := foldl self.PosY .. @{self.CurrY} + HorizList.Height;
+    HorizList.PosX := self.CurrX;
+    HorizList.PosY := @{self.CurrY};
+  }
+}
+
+trait Data {
+    rules {
+        // setFont
+        self.FontStyle1 :=
+            if self.FontStyle0 == 0 - 1 then
+                self.ParentFontStyle
+            else
+                self.FontStyle0;
+        
+        // resolveFlex
+
+        // resolveRelative
+        self.WidthRel := self.RelWidth * self.PWidth;
+
+        self.Width :=
+            if isFLEX(self.WMode) then
+                self.WidthFlex
+            else if isREL(self.WMode) then
+                self.WidthRel
+            else // ABS
+                self.WidthAbs;
+        
+        // computeHeight
+        // setPositions
+    }
+}
+
+// ============================= //
+// ========== Program ========== //
+// ============================= //
+
+interface Document {
+    // model arguments to PageList.setFont
+    input FontStyle : int;
+}
+class CDocument : Document {
+    children {
+        PageList : [Page];
+    }
+    rules {
+        PageList.ParentFontStyle := self.FontStyle;
+    }
+}
+
+interface Page {
+    // setFont
+    input FontStyle0 : int;
+    output FontStyle1 : int;
+    // args
+    output ParentFontStyle : int;
+    
+    // resolveFlexWidths
+    input WidthAbs : int;
+    input WMode : int;
+    input MaxWidth : int;
+    output WidthFlex : int;
+    
+    // resolveRelativeWidths
+    input RelWidth : int;
+    output WidthRel : int;
+    output Width : int;
+
+     // computeHeights
+    output Height : int;
+    output AggregatedHeight : int;
+    
+    // setPositions
+    output PosX : int;
+    output PosY : int;
+    output CurrX : int;
+    output CurrY : int;
+}
+
+class CPage(Data, Horizontal) : Page {
+    children {
+        HorizList : [HorizontalContainer];
+    }
+    rules {
+        // 1. setFont
+
+        // 2. resolveFlexWidths
+        self.WidthFlex := self.MaxWidth;
+        self.WidthRel := if isREL(self.WMode) then panic() else -1;
+        
+        // 3. resolveRelativeWidths
+
+        // 4. computeHeights:
+        
+        // 5. setPositions
+        self.PosX := 0;
+        self.PosY := 0;
+    }
+}
+
+interface HorizontalContainer {
+    // setFont
+    input FontStyle0 : int;
+    output FontStyle1 : int;
+    // args
+    output ParentFontStyle : int; 
+
+    // resolveFlexWidths
+    input WidthAbs : int;
+    input WMode : int;
+    input AccumulatedWidth : int;
+    output WidthFlex : int;
+    
+    // resolveRelativeWidths
+    input RelWidth : int;
+    // args
+    output WidthRel : int;
+    output PWidth : int;
+    output Width : int;
+    
+    // computeHeights
+    output Height : int;
+    output MaxHeight : int;
+
+    // setPositions
+    output PosX : int;
+    output PosY : int;
+    output CurrX : int;
+    output CurrY : int;
+}
+class CHorizontalContainer(Data) : HorizontalContainer {
+    children {
+        ElementList : [Element];
+    }
+    rules {
+        // 1. setFont
+        ElementList.ParentFontStyle := self.FontStyle1;
+        
+        // 2. resolveFlexWidths
+        self.WidthFlex := self.AccumulatedWidth;
+        
+        // 3. resolveRelativeWidths
+            
+        // pass downwards
+        ElementList.PWidth := self.Width;
+        
+        // 4. computeHeights
+        self.MaxHeight := foldl 0 .. max(@{self.MaxHeight}, ElementList.Height);
+        self.Height := self.MaxHeight;
+        
+        // 5. setPositions
+        self.CurrX := foldl self.PosX .. @{self.CurrX} + ElementList.Width;
+        self.CurrY := self.PosY;
+        ElementList.PosX := @{self.CurrX};
+        ElementList.PosY := self.CurrY;
+    }
+}
+
+interface Element {
+    // setFont
+    input FontStyle0 : int;
+    output FontStyle1 : int;
+    // args
+    output ParentFontStyle : int;
+    
+    // resolveFlexWidths
+    input RelWidth : int;
+    input WidthAbs : int;
+    input WMode : int;
+    input MaxWidth : int;
+    output WidthFlex : int; 
+    
+    // resolveRelativeWidths
+    output WidthRel : int; 
+    output Width : int;
+    // args
+    output PWidth : int;
+    
+    // computeHeights
+    input ElementType : int;
+    output AggregatedHeight : int;
+    output Height : int;
+    
+    // setPositions
+    output PosX : int;
+    output PosY : int;
+    // args
+    output CurrX : int; 
+    output CurrY : int;
+}
+class CNormalElement(Data) : Element {
+    children {}
+    rules {
+        // 1. setFont
+
+        // 2. resolveFlexWidths
+        self.WidthFlex := if isFLEX(self.WMode) then panic() else -1;
+
+        // 3. resolveRelativeWidths
+
+        // 4. computeHeights
+        self.AggregatedHeight := -1; // not used
+        self.Height :=
+            if isTextBox(self.ElementType) then
+                computeHeights4TextBox( self.FontStyle1, self.Width )
+            else if isList(self.ElementType) then
+                computeHeights4List( self.FontStyle1, self.Width )
+            else if isImage(self.ElementType) then
+                computeHeights4Image( self.Width )
+            else
+                default();
+        
+        // 5. setPositions
+        self.CurrX := -1; // not used
+        self.CurrY := -1; // not used
+    }
+}
+class CVerticalContainer(Data, Horizontal) : Element {
+    children {
+        HorizList : [HorizontalContainer];
+    }
+    rules {
+        // 1. setFont
+
+        // 2. resolveFlexWidths
+        self.WidthFlex := self.MaxWidth;
+        
+        // 3. resolveRelativeWidths
+
+        // 4. computeHeights
+        self.Height := self.AggregatedHeight;
+        
+        // 5. setPositions
+    }
+}
