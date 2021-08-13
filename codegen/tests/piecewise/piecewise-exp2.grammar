@@ -1,0 +1,122 @@
+// basic skeleton for piecewise function
+// run with: ./run.rkt --root VirtualRoot fuse benchmarks/tests/piecewise-test1-exp2.grammar
+//
+// n->differentiate() x5
+// n->project(0)
+//
+// this works
+
+traversal fuse {
+    case CVirtualRoot {
+        ??;
+        recur root;
+    }
+    case CNode {
+        iterate left { ??; recur left; }
+        iterate right { ??; recur right; }
+        ??;
+    }
+}
+
+// ============================= //
+// ========== Program ========== //
+// ============================= //
+
+interface VirtualRoot {
+    
+}
+class CVirtualRoot : VirtualRoot {
+    children {
+        root : Node;
+    }
+    rules {
+        root.final1_arg_x := 0; // n->project(0)
+    }
+}
+
+interface Node {
+    // is_leaf property related
+    output id : bool;
+    output has_left : bool;
+    output has_right : bool;
+    output is_leaf : bool;
+
+    // main attributes
+    input startDom : int;
+    input endDom : int;
+    input coeff : Poly; // only available to leaf node; for non-leaf this is null()
+    input project_val : int; // all nodes have it, init to null()
+
+    // computed attributes
+    output final0_coeff : Poly; // after diff x5
+    output final0_project_val : int; // after diff x5
+    output final1_coeff : Poly; // after project
+    output final1_project_val : int; // after project
+
+    // args
+    output final1_arg_x : int;
+}
+class CNode : Node {
+    children {
+        left : [Node]; // 0 or 1
+        right : [Node]; // 0 or 1
+    }
+    rules {
+        // is_leaf property computation
+        self.id := true;
+        self.is_leaf := self.has_left && self.has_right;
+        self.has_left := [0]{ left.id : !true };
+        self.has_right := [0]{ right.id : !true };
+
+        self.final0_coeff := 
+            if self.is_leaf then
+                differentiate_x5( self.coeff )
+            else
+                null();
+        self.final0_project_val := self.project_val;
+
+        self.final1_coeff := self.final0_coeff;
+        left.final1_arg_x := self.final1_arg_x;
+        right.final1_arg_x := self.final1_arg_x;
+        self.final1_project_val :=
+            if self.is_leaf then
+                if self.final1_arg_x < self.startDom || self.final1_arg_x > self.endDom then
+                    self.final0_project_val
+                else
+                    project( self.final0_coeff, self.final1_arg_x )
+            else
+                if self.final1_arg_x < self.startDom || self.final1_arg_x > self.endDom then
+                    self.final0_project_val
+                else
+                    if self.final1_arg_x >= [0]{ left.startDom : default() } && self.final1_arg_x < [0]{ left.endDom : default() } then
+                        [0]{ left.final1_project_val : default() }
+                    else
+                        if self.final1_arg_x >= [0]{ right.startDom : default() } && self.final1_arg_x < [0]{ right.endDom : default() } then
+                            [0]{ right.final1_project_val : default() }
+                        else
+                            self.final0_project_val;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

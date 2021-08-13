@@ -1,0 +1,144 @@
+// basic skeleton for piecewise function
+// run with: ./run.rkt --root VirtualRoot fuse benchmarks/tests/piecewise-test1-exp3.grammar
+//
+// n->addConst(3.5);  --> do0
+// n->square();       --> do0
+// n->rangeMulConst(0, -10000, 0);   --> do1
+// n->mulVar(); | x3    --> do2
+// n->boundedIntegrate(-100000, 100000);    --> do3
+//
+// this works
+
+traversal fuse {
+    case CVirtualRoot {
+        ??;
+        recur root;
+    }
+    case CNode {
+        iterate left { ??; recur left; }
+        iterate right { ??; recur right; }
+        ??;
+    }
+}
+
+// ============================= //
+// ========== Program ========== //
+// ============================= //
+
+interface VirtualRoot {
+    
+}
+class CVirtualRoot : VirtualRoot {
+    children {
+        root : Node;
+    }
+    rules {
+        root.final0_arg := arg_list( 3.5 ); // n->addConst(3.5);
+        root.final1_arg := arg_list( 0, -10000, 0 ); // n->rangeMulConst(0, -10000, 0);
+        // no arg for do2
+        root.final3_arg := arg_list( -100000, 100000 ); // n->boundedIntegrate(-100000, 100000);
+    }
+}
+
+interface Node {
+    // is_leaf property related
+    output id : bool;
+    output has_left : bool;
+    output has_right : bool;
+    output is_leaf : bool;
+
+    // main attributes
+    input startDom : int;
+    input endDom : int;
+    input coeff : Poly; // only available to leaf node; for non-leaf this is null()
+    input project_val : int; // all nodes have it, init to null() / in buildTree it's init to 0.0
+
+    // computed attributes
+    output final0_coeff : Poly;
+    output final1_coeff : Poly; 
+    output final2_coeff : Poly;
+    output final3_project_val : int; // after do3
+
+    // args
+    output final0_arg : int; // arg for do0
+    output final1_arg : int; // arg for do1
+    // no arg for do2
+    output final3_arg : int; // arg for do3
+}
+class CNode : Node {
+    children {
+        left : [Node]; // 0 or 1
+        right : [Node]; // 0 or 1
+    }
+    rules {
+        // is_leaf property computation
+        self.id := true;
+        self.is_leaf := self.has_left && self.has_right;
+        self.has_left := [0]{ left.id : !true };
+        self.has_right := [0]{ right.id : !true };
+
+        // ==== do0 ==== //
+        left.final0_arg := self.final0_arg;
+        right.final0_arg := self.final0_arg;
+        self.final0_coeff := 
+            if self.is_leaf then
+                add_const_and_square( self.coeff, self.final0_arg )
+            else
+                null();
+
+        // ==== do1 ==== //
+        left.final1_arg := split_left( self.final1_arg );
+        right.final1_arg := split_right( self.final1_arg );
+        self.final1_coeff :=
+            if self.is_leaf then
+                if out_of_range( self.final1_arg, self.startDom, self.endDom ) then
+                    self.final0_coeff
+                else
+                    mul_const( self.final0_coeff, self.final1_arg )
+            else
+                null();
+
+        // ==== do2 ==== //
+        self.final2_coeff := 
+            if self.is_leaf then
+                mul_var_x3( self.final1_coeff )
+            else
+                null();
+
+        // ==== do3 ==== //
+        left.final3_arg := re_range( self.final3_arg, self.startDom, self.endDom );
+        right.final3_arg := re_range( self.final3_arg, self.startDom, self.endDom );
+        self.final3_project_val :=
+            if self.is_leaf then
+                if out_of_range( self.final2_coeff, self.startDom, self.endDom ) then
+                    0.0
+                else
+                    bounded_integrate( self.final2_coeff, self.final3_arg )
+            else
+                [0]{ left.final3_project_val : default() } + [0]{ right.final3_project_val : default() };
+
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
