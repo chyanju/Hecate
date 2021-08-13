@@ -1,0 +1,476 @@
+traversal fuse {
+    case CProgram {
+        iterate Functions { recur Functions; }
+    }
+
+    case CFunction {
+        iterate StmtList { ??; recur StmtList; }
+        iterate Next { recur Next; }
+    }
+
+    case CStatement {
+        ??;
+        iterate Id { ??; recur Id; }
+        iterate AssignedExpr { ??; }
+        ??;
+        iterate AssignedExpr { ??; recur AssignedExpr; }
+        ??;
+        iterate Condition { ??; recur Condition; }
+        
+        iterate ThenPart { ??; recur ThenPart; }
+        iterate ElsePart { ??; recur ElsePart; }
+        iterate Next { ??; recur Next; }
+    }
+
+    case CExpression {
+        iterate LHS { ??; recur LHS; }
+        iterate RHS { ??; recur RHS; }
+        ??;
+    }
+}
+
+// ============================= //
+// ========== Program ========== //
+// ============================= //
+interface Program {
+    
+}
+class CProgram : Program {
+    children {
+        Functions : [Function]; // Function, 0/1
+    }
+    rules {}
+}
+
+// ============================== //
+// ========== Function ========== //
+// ============================== //
+interface Function {
+    
+}
+class CFunction : Function {
+    children {
+        Next : [Function]; // Function, 0/1
+        StmtList : [Statement]; // Statement, 0/1
+    }
+    rules {
+        // =============================
+        // propagateConstantsAssignments
+        // =============================
+            StmtList.Args3 := empty(); // fresh new one
+            StmtList.P5 := !true; // default to not remove
+        // =============================
+    }
+}
+
+// =============================== //
+// ========== Statement ========== //
+// =============================== //
+interface Statement {
+    input StatementType0 : int; // e.g., ASSIGNMENT, IF, NOP, INC, DECR
+    input NodeType0 : int; // e.g., STMT, EXPR, FUNCTION, SEQ
+
+    // ==== only add properties needed by procedures ==== //
+
+    // desugarDecr
+    output StatementType1 : int; 
+    output NodeType1 : int;
+    output Args1 : set;
+
+    // desugarInc
+    output StatementType2 : int; 
+    output NodeType2 : int;
+    output Args2 : set;
+
+    // propagateConstantsAssignments
+    output StatementType3 : int; 
+    output NodeType3 : int; 
+    output Cond3 : bool; 
+    output Args3 : map; 
+
+    // foldConstants
+    output StatementType4 : int; 
+    output NodeType4 : int; 
+    output Args4 : set; 
+
+    // removeUnreachableBranches
+    output StatementType5 : int; 
+    output NodeType5 : int; 
+    output Args5 : set; 
+    output P5 : bool; // is this stmt inside a branch that should be removed
+}
+
+class CStatement : Statement {
+    children {
+        Id : [Expression]; // only for AssignStmt, IncrStmt, and DecrStmt
+        AssignedExpr : [Expression]; // only for AssignStmt
+        Next : [Statement];
+        // only for IfStmt
+        Condition : [Expression];
+        ThenPart : [Statement];
+        ElsePart : [Statement];
+    }
+    rules {
+        // ===========
+        // desugarDecr
+        // ===========
+        // self
+        self.StatementType1 :=  if isDECR(self.StatementType0) then ASSIGNMENT() else self.StatementType0; 
+        self.NodeType1 :=  if isDECR(self.StatementType0) then STMT() else self.NodeType0; 
+            // stuffing
+            self.Args1 := none();
+
+        // AssignedExpr
+        AssignedExpr.ExpressionType1 := if isDECR(self.StatementType0) then BINARY() else AssignedExpr.ExpressionType0;
+        AssignedExpr.NodeType1 := if isDECR(self.StatementType0) then EXPR() else AssignedExpr.NodeType0;
+        AssignedExpr.Operator1 := if isDECR(self.StatementType0) then SUBTRACT() else AssignedExpr.Operator0;
+            // stuffing
+            AssignedExpr.VarId1 := AssignedExpr.VarId0;
+            AssignedExpr.Value1 := AssignedExpr.Value0;
+
+        AssignedExpr.Args1 := 
+            if isDECR(self.StatementType0) then 
+                Args1(
+                    LHS(
+                        NodeType1(EXPR()),
+                        ExpressionType1(VARREF()),
+                        VarId1([0]{ Id.VarId0 : panic() })),
+                    RHS(
+                        NodeType1(EXPR()),
+                        ExpressionType1(CONSTANT()),
+                        Value1(1))
+                )
+            else 
+                none();
+
+        // others
+        Id.ExpressionType1 := Id.ExpressionType0;
+        Id.NodeType1 := Id.NodeType0;
+        Id.Operator1 := Id.Operator0;
+        Id.VarId1 := Id.VarId0;
+        Id.Value1 := Id.Value0;
+        Id.Args1 := none();
+        Condition.ExpressionType1 := Condition.ExpressionType0;
+        Condition.NodeType1 := Condition.NodeType0;
+        Condition.Operator1 := Condition.Operator0;
+        Condition.VarId1 := Condition.VarId0;
+        Condition.Value1 := Condition.Value0;
+        Condition.Args1 := none();
+        // ===========
+
+        // ==========
+        // desugarInc
+        // ==========
+        // self
+        self.StatementType2 :=  if isINC(self.StatementType1) then ASSIGNMENT() else self.StatementType1; 
+        self.NodeType2 :=  if isINC(self.StatementType1) then STMT() else self.NodeType1; 
+            // stuffing
+            self.Args2 := none();
+
+        // AssignedExpr
+        AssignedExpr.ExpressionType2 := if isINC(self.StatementType1) then BINARY() else AssignedExpr.ExpressionType1;
+        AssignedExpr.NodeType2 := if isINC(self.StatementType1) then EXPR() else AssignedExpr.NodeType1;
+        AssignedExpr.Operator2 := if isINC(self.StatementType1) then ADD() else AssignedExpr.Operator1;
+            // stuffing
+            AssignedExpr.VarId2 := AssignedExpr.VarId1;
+            AssignedExpr.Value2 := AssignedExpr.Value1;
+
+        AssignedExpr.Args2 := 
+            if isINC(self.StatementType1) then 
+                Args2(
+                LHS(
+                    NodeType2(EXPR()),
+                    ExpressionType2(VARREF()),
+                    VarId2([0]{ Id.VarId1 : panic() })),
+                RHS(
+                    NodeType2(EXPR()),
+                    ExpressionType2(CONSTANT()),
+                    Value2(1)))
+            else 
+                none();
+
+        // others
+        Id.ExpressionType2 := Id.ExpressionType1;
+        Id.NodeType2 := Id.NodeType1;
+        Id.Operator2 := Id.Operator1;
+        Id.VarId2 := Id.VarId1;
+        Id.Value2 := Id.Value1;
+        Id.Args2 := none();
+        Condition.ExpressionType2 := Condition.ExpressionType1;
+        Condition.NodeType2 := Condition.NodeType1;
+        Condition.Operator2 := Condition.Operator1;
+        Condition.VarId2 := Condition.VarId1;
+        Condition.Value2 := Condition.Value1;
+        Condition.Args2 := none();
+        // ==========
+
+        // =============================
+        // propagateConstantsAssignments
+        // =============================
+        // AssignedExpr & self
+        self.StatementType3 := self.StatementType2;
+        self.NodeType3 := self.NodeType2;
+        self.Cond3 := // whether there is a var ref we can replace
+            isASSIGNMENT(self.StatementType2) &&
+            isVARREF( [0]{ AssignedExpr.ExpressionType2 : default() } ) &&
+            contains( self.Args3, [0]{ AssignedExpr.VarId2 : default() } );
+
+        AssignedExpr.ExpressionType3 := if self.Cond3 then CONSTANT() else AssignedExpr.ExpressionType2;
+        AssignedExpr.Value3 :=
+            if self.Cond3 then
+                lookup(self.Args3, [0]{ AssignedExpr.VarId2 : default() })
+            else
+                AssignedExpr.Value2;
+        AssignedExpr.Args3 := self.Args3;
+            // stuffing
+            AssignedExpr.NodeType3 := AssignedExpr.NodeType2;
+            AssignedExpr.Operator3 := AssignedExpr.Operator2;
+            AssignedExpr.VarId3 := AssignedExpr.VarId2;
+
+        Next.Args3 := 
+            if isASSIGNMENT(self.StatementType3) && isCONSTANT( [0]{ AssignedExpr.ExpressionType3 : default() } ) then
+                insert( self.Args3, key([0]{ Id.VarId3 : default() }), value([0]{ AssignedExpr.Value3 : default() }) )
+            else
+                self.Args3;
+
+        // others
+        ThenPart.Args3 := self.Args3;
+        ElsePart.Args3 := self.Args3;
+        Id.ExpressionType3 := Id.ExpressionType2;
+        Id.NodeType3 := Id.NodeType2;
+        Id.Operator3 := Id.Operator2;
+        Id.VarId3 := Id.VarId2;
+        Id.Value3 := Id.Value2;
+        Id.Args3 := self.Args3;
+        Condition.ExpressionType3 := Condition.ExpressionType2;
+        Condition.NodeType3 := Condition.NodeType2;
+        Condition.Operator3 := Condition.Operator2;
+        Condition.VarId3 := Condition.VarId2;
+        Condition.Value3 := Condition.Value2;
+        Condition.Args3 := self.Args3;
+        // =============================
+
+        // =============
+        // foldConstants
+        // =============
+        // do nothing at the statement level
+        // stuffing
+            self.StatementType4 := self.StatementType3;
+            self.NodeType4 := self.NodeType3;
+            self.Args4 := none();
+        // =============
+
+        // =========================
+        // removeUnreachableBranches
+        // =========================
+            ThenPart.P5 := 
+                if self.P5 then
+                    true
+                else if isIF(self.StatementType4) && isCONSTANT( [0]{ Condition.ExpressionType4 : default() }) then
+                    if equal( [0]{ Condition.Value4 : default() }, 0 ) then
+                        true
+                    else
+                        !true
+                else
+                    !true;
+
+            ElsePart.P5 :=
+                if self.P5 then
+                    true
+                else if isIF(self.StatementType4) && isCONSTANT( [0]{ Condition.ExpressionType4 : default() }) then
+                    if not_equal( [0]{ Condition.Value4 : default() }, 0 ) then
+                        true
+                    else
+                        !true
+                else
+                    !true;
+            Next.P5 := self.P5;
+
+            self.NodeType5 := if self.P5 then STMT() else self.NodeType4;
+            self.StatementType5 := if self.P5 then NOP() else self.StatementType4;
+                // stuffing
+                self.Args5 := none();
+        // =========================
+    }
+}
+
+// ================================ //
+// ========== Expression ========== //
+// ================================ //
+interface Expression {
+    input ExpressionType0 : int; // e.g., CONSTANT, BINARY, VARREF
+    input NodeType0 : int; // e.g., STMT, EXPR, FUNCTION, SEQ
+    input Operator0 : int; // BINARY only
+    input VarId0 : int; // VARREF only
+    input Value0 : int; // CONSTANT only
+
+    // ==== only add properties needed by procedures ==== //
+    output ExpressionType1 : int; // desugarDecr
+    output NodeType1 : int; // desugarDecr
+    output Operator1 : int; // desugarDecr
+    output VarId1 : int; // desugarDecr
+    output Value1 : int; // desugarDecr
+    output Args1 : set;  // desugarDecr
+
+    output ExpressionType2 : int; // desugarInc
+    output NodeType2 : int; // desugarInc
+    output Operator2 : int; // desugarInc
+    output VarId2 : int; // desugarInc
+    output Value2 : int; // desugarInc
+    output Args2 : set;  // desugarInc
+
+    output ExpressionType3 : int; // propagateConstantsAssignments
+    output NodeType3 : int; // propagateConstantsAssignments
+    output Operator3 : int; // propagateConstantsAssignments
+    output VarId3 : int; // propagateConstantsAssignments
+    output Value3 : int; // propagateConstantsAssignments
+    output Args3 : set;  // propagateConstantsAssignments
+
+    output ExpressionType4 : int; // foldConstants
+    output NodeType4 : int; // foldConstants
+    output Operator4 : int; // foldConstants
+    output VarId4 : int; // foldConstants
+    output Value4 : int; // foldConstants
+    output Args4 : set;  // foldConstants
+
+    output ExpressionType5 : int; // removeUnreachableBranches
+    output NodeType5 : int; // removeUnreachableBranches
+    output Operator5 : int; // removeUnreachableBranches
+    output VarId5 : int; // removeUnreachableBranches
+    output Value5 : int; // removeUnreachableBranches
+    output Args5 : set;  // removeUnreachableBranches
+}
+class CExpression : Expression {
+    children {
+        LHS : [Expression]; // 0/1
+        RHS : [Expression]; // 0/1
+    }
+    rules {
+        // ===========
+        // desugarDecr
+        // ===========
+            // LHS
+            LHS.NodeType1 := if is_none(self.Args1) then LHS.NodeType0 else get_LHS_node_type(self.Args1);
+            LHS.ExpressionType1 := if is_none(self.Args1) then LHS.ExpressionType0 else get_LHS_ExpressionType(self.Args1);
+            LHS.VarId1 := if is_none(self.Args1) then LHS.VarId0 else get_LHS_var_Id(self.Args1);
+                // stuffing
+                LHS.Operator1 := LHS.Operator0;
+                LHS.Value1 := LHS.Value0;
+                LHS.Args1 := none();
+
+            // RHS
+            RHS.NodeType1 := if is_none(self.Args1) then RHS.NodeType0 else get_RHS_node_type(self.Args1);
+            RHS.ExpressionType1 := if is_none(self.Args1) then RHS.ExpressionType0 else get_RHS_ExpressionType(self.Args1);
+            RHS.Value1 := if is_none(self.Args1) then RHS.Value0 else get_RHS_value(self.Args1);
+                // stuffing
+                RHS.Operator1 := RHS.Operator0;
+                RHS.VarId1 := RHS.VarId0;
+                RHS.Args1 := none();
+        // ===========
+
+        // ==========
+        // desugarInc
+        // ==========
+            // LHS
+            LHS.NodeType2 := if is_none(self.Args2) then LHS.NodeType1 else get_LHS_node_type(self.Args2);
+            LHS.ExpressionType2 := if is_none(self.Args2) then LHS.ExpressionType1 else get_LHS_ExpressionType(self.Args2);
+            LHS.VarId2 := if is_none(self.Args2) then LHS.VarId1 else get_LHS_var_Id(self.Args2);
+                // stuffing
+                LHS.Operator2 := LHS.Operator1;
+                LHS.Value2 := LHS.Value1;
+                LHS.Args2 := none();
+
+            // RHS
+            RHS.NodeType2 := if is_none(self.Args2) then RHS.NodeType1 else get_RHS_node_type(self.Args2);
+            RHS.ExpressionType2 := if is_none(self.Args2) then RHS.ExpressionType1 else get_RHS_ExpressionType(self.Args2);
+            RHS.Value2 := if is_none(self.Args2) then RHS.Value1 else get_RHS_value(self.Args2);
+                // stuffing
+                RHS.Operator2 := RHS.Operator1;
+                RHS.VarId2 := RHS.VarId1;
+                RHS.Args2 := none();
+        // ==========
+
+        // =============================
+        // propagateConstantsAssignments
+        // =============================
+            // LHS: it's fine to ignore LHS->replaceVarRefWithConst(VarRefId, Val)
+            //      since LHS will always be Expression
+            LHS.Args3 := self.Args3;
+            LHS.ExpressionType3 :=
+                if isVARREF(LHS.ExpressionType2) && equal(LHS.VarId2, getVarRefId(LHS.Args3)) then
+                    CONSTANT()
+                else
+                    LHS.ExpressionType2;
+            LHS.Value3 :=
+                if isVARREF(LHS.ExpressionType2) && equal(LHS.VarId2, getVarRefId(LHS.Args3)) then
+                    getValue(LHS.Args3)
+                else
+                    LHS.Value2;
+                // stuffing
+                LHS.NodeType3 := LHS.NodeType2;
+                LHS.Operator3 := LHS.Operator2;
+                LHS.VarId3 := LHS.VarId2;
+
+            // RHS: it's fine to ignore RHS->replaceVarRefWithConst(VarRefId, Val)
+            //      since RHS will always be Expression
+            RHS.Args3 := self.Args3;
+            RHS.ExpressionType3 :=
+                if isVARREF(RHS.ExpressionType2) && equal(RHS.VarId2, getVarRefId(RHS.Args3)) then
+                    CONSTANT()
+                else
+                    RHS.ExpressionType2;
+            RHS.Value3 :=
+                if isVARREF(RHS.ExpressionType2) && equal(RHS.VarId2, getVarRefId(RHS.Args3)) then
+                    getValue(RHS.Args3)
+                else
+                    RHS.Value2;
+                // stuffing
+                RHS.NodeType3 := RHS.NodeType2;
+                RHS.Operator3 := RHS.Operator2;
+                RHS.VarId3 := RHS.VarId2;
+        // =============================
+
+        // =============
+        // foldConstants
+        // =============
+            // self
+            self.NodeType4 :=
+                if isCONSTANT( [0]{ LHS.ExpressionType3 : default() } ) && isCONSTANT( [0]{ RHS.ExpressionType3 : default() }) then
+                    EXPR()
+                else
+                    self.NodeType3;
+            self.ExpressionType4 :=
+                if isCONSTANT( [0]{ LHS.ExpressionType3 : default() } ) && isCONSTANT( [0]{ RHS.ExpressionType3 : default() }) then
+                    CONSTANT()
+                else
+                    self.ExpressionType3;
+            self.Value4 :=
+                if isCONSTANT( [0]{ LHS.ExpressionType3 : default() } ) && isCONSTANT( [0]{ RHS.ExpressionType3 : default() }) then
+                    if isADD(self.Operator3) then
+                        [0]{ LHS.Value4 : default() } + [0]{ RHS.Value4 : default() }
+                    else if isSUBTRACT(self.Operator3) then
+                        [0]{ LHS.Value4 : default() } - [0]{ RHS.Value4 : default() }
+                    else
+                        self.Value3
+                else
+                    self.Value3;
+                // stuffing
+                self.Operator4 := self.Operator3;
+                self.VarId4 := self.VarId3;
+                self.Args4 := none();
+        // =============
+
+        // =========================
+        // removeUnreachableBranches
+        // =========================
+        // do nothing at the expression level
+        // stuffing
+            self.ExpressionType5 := self.ExpressionType4;
+            self.NodeType5 := self.NodeType4;
+            self.Operator5 := self.Operator4;
+            self.VarId5 := self.VarId4;
+            self.Value5 := self.Value4;
+            self.Args5 := none();
+        // =========================
+    }
+}

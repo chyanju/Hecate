@@ -2,27 +2,33 @@
 
 traversal fuse {
     case CDocument {
-        ??;
-        iterate PageList { ??; recur PageList; ??; }
-        ??;
+        ??; iterate PageList0 { ??; recur PageList0; ??; } ??;
+        ??; iterate PageList { ??; recur PageList; ??; } ??;
+    }
+    case CPage0 {
+        ??; iterate HorizList { ??; recur HorizList; ??; } ??;
     }
     case CPage {
-        ??;
-        iterate HorizList { ??; recur HorizList; ??; }
-        ??;
+        ??; iterate HorizList { ??; recur HorizList; ??; } ??;
+    }
+
+    case CHorizontalContainer0 {
+        ??; iterate ElementList { ??; recur ElementList; ??; } ??;
     }
     case CHorizontalContainer {
-        ??;
-        iterate ElementList { ??; recur ElementList; ??; }
+        ??; iterate ElementList { ??; recur ElementList; ??; } ??;
+    }
+    case CGenericElement0 {
         ??;
     }
-    case CNormalElement {
+    case CGenericElement {
         ??;
+    }
+    case CVerticalContainer0 {
+        ??; iterate HorizList { ??; recur HorizList; ??; } ??;
     }
     case CVerticalContainer {
-        ??;
-        iterate HorizList { ??; recur HorizList; ??; }
-        ??;
+        ??; iterate HorizList { ??; recur HorizList; ??; } ??;
     }
 }
 
@@ -35,8 +41,7 @@ trait Horizontal {
     HorizList.PWidth := self.Width;
     
     // computeHeight
-    self.AggregatedHeight := foldl 0 .. @{self.AggregatedHeight} + HorizList.Height;
-    self.Height := self.AggregatedHeight;
+    self.Height := self.CurrY;
     
     // setPositions
     self.CurrX := self.PosX;
@@ -83,10 +88,84 @@ interface Document {
 }
 class CDocument : Document {
     children {
+        PageList0 : [Page0];
         PageList : [Page];
     }
     rules {
+        PageList.PosX := 0;
+        PageList.PosY := 0;
         PageList.ParentFontStyle := self.FontStyle;
+    }
+}
+
+interface Page0 {
+    input WidthAbs : int;
+    input WMode : int;
+    output MaxWidth : int;
+    output Width : int;
+}
+class CPage0 : Page0 {
+    children {
+        HorizList : [HorizontalContainer0];
+    }
+    rules {
+        self.MaxWidth := foldl 0 .. max(@{self.MaxWidth}, HorizList.Width);
+        self.Width :=
+            if isFLEX(self.WMode) then
+                self.MaxWidth
+            else
+                self.WidthAbs;
+    }
+}
+
+interface HorizontalContainer0 {
+    input WidthAbs : int;
+    input WMode : int;
+    output AccumulatedWidth : int;
+    output Width : int;
+}
+class CHorizontalContainer0 : HorizontalContainer0 {
+    children {
+        ElementList : [Element0];
+    }
+    rules {
+        self.AccumulatedWidth := foldl 0 .. @{self.AccumulatedWidth} + ElementList.Width;
+        self.Width :=
+            if isFLEX(self.WMode) then
+                self.AccumulatedWidth
+            else
+                self.WidthAbs;
+    }
+}
+
+interface Element0 {
+    input WidthAbs : int;
+    input WMode : int;
+    output MaxWidth : int;
+    output Width : int;
+}
+class CGenericElement0 : Element0 {
+    children {}
+    rules {
+        self.MaxWidth := -1; // not used
+        self.Width :=
+            if isFLEX(self.WMode) then
+                panic()
+            else
+                self.WidthAbs;
+    }
+}
+class CVerticalContainer0 : Element0 {
+    children {
+        HorizList : [HorizontalContainer0];
+    }
+    rules {
+        self.MaxWidth := foldl 0 .. max(@{self.MaxWidth}, HorizList.Width);
+        self.Width :=
+            if isFLEX(self.WMode) then
+                self.MaxWidth
+            else
+                self.WidthAbs;
     }
 }
 
@@ -100,7 +179,7 @@ interface Page {
     // resolveFlexWidths
     input WidthAbs : int;
     input WMode : int;
-    input MaxWidth : int;
+    output MaxWidth : int;
     output WidthFlex : int;
     
     // resolveRelativeWidths
@@ -110,7 +189,6 @@ interface Page {
 
      // computeHeights
     output Height : int;
-    output AggregatedHeight : int;
     
     // setPositions
     output PosX : int;
@@ -127,6 +205,7 @@ class CPage(Data, Horizontal) : Page {
         // 1. setFont
 
         // 2. resolveFlexWidths
+        self.MaxWidth := tunnel();
         self.WidthFlex := self.MaxWidth;
         self.WidthRel := if isREL(self.WMode) then panic() else -1;
         
@@ -135,8 +214,6 @@ class CPage(Data, Horizontal) : Page {
         // 4. computeHeights:
         
         // 5. setPositions
-        self.PosX := 0;
-        self.PosY := 0;
     }
 }
 
@@ -150,7 +227,7 @@ interface HorizontalContainer {
     // resolveFlexWidths
     input WidthAbs : int;
     input WMode : int;
-    input AccumulatedWidth : int;
+    output AccumulatedWidth : int;
     output WidthFlex : int;
     
     // resolveRelativeWidths
@@ -179,6 +256,7 @@ class CHorizontalContainer(Data) : HorizontalContainer {
         ElementList.ParentFontStyle := self.FontStyle1;
         
         // 2. resolveFlexWidths
+        self.AccumulatedWidth := tunnel();
         self.WidthFlex := self.AccumulatedWidth;
         
         // 3. resolveRelativeWidths
@@ -209,7 +287,7 @@ interface Element {
     input RelWidth : int;
     input WidthAbs : int;
     input WMode : int;
-    input MaxWidth : int;
+    output MaxWidth : int;
     output WidthFlex : int; 
     
     // resolveRelativeWidths
@@ -219,8 +297,6 @@ interface Element {
     output PWidth : int;
     
     // computeHeights
-    input ElementType : int;
-    output AggregatedHeight : int;
     output Height : int;
     
     // setPositions
@@ -230,27 +306,19 @@ interface Element {
     output CurrX : int; 
     output CurrY : int;
 }
-class CNormalElement(Data) : Element {
+class CGenericElement(Data) : Element {
     children {}
     rules {
         // 1. setFont
 
         // 2. resolveFlexWidths
+        self.MaxWidth := tunnel();
         self.WidthFlex := if isFLEX(self.WMode) then panic() else -1;
 
         // 3. resolveRelativeWidths
 
         // 4. computeHeights
-        self.AggregatedHeight := -1; // not used
-        self.Height :=
-            if isTextBox(self.ElementType) then
-                computeHeights4TextBox( self.FontStyle1, self.Width )
-            else if isList(self.ElementType) then
-                computeHeights4List( self.FontStyle1, self.Width )
-            else if isImage(self.ElementType) then
-                computeHeights4Image( self.Width )
-            else
-                default();
+        self.Height := evalHeight();
         
         // 5. setPositions
         self.CurrX := -1; // not used
@@ -265,12 +333,13 @@ class CVerticalContainer(Data, Horizontal) : Element {
         // 1. setFont
 
         // 2. resolveFlexWidths
+        self.MaxWidth := tunnel();
         self.WidthFlex := self.MaxWidth;
         
         // 3. resolveRelativeWidths
 
         // 4. computeHeights
-        self.Height := self.AggregatedHeight;
+        self.Height := self.CurrY;
         
         // 5. setPositions
     }
