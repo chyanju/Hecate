@@ -1,21 +1,53 @@
-## initialH: Experimental Tree Traversal Synthesis
+## Hecate: Tree Traversal Synthesis Using Domain-Specific Symbolic Compilation
 
-### General-Purpose Encoding
+This branch (`checking`) is the implementation of general-purpose encoding.
 
-(The `checking` branch: general-purpose encoding.)
+### Prerequisites
 
-### Known Issues
+- Racket 7.7 ([https://download.racket-lang.org/releases/7.7/](https://download.racket-lang.org/releases/7.7/))
 
-- Enabling full examples makes `ast` very slow.
+- Rosette 3.2 ([https://github.com/emina/rosette](https://github.com/emina/rosette))
 
-- ~~Uninterpreted function parsing/interpretation is not yet supported.~~
-  - ~~This affects (including): `hv-toy.grammar`,  `fmm.grammar`.~~
-- ~~Attributes marked as `input` are currently not set.~~
-  - ~~This affects (including): `piecewise`.~~
-- ~~Switch to matrix encoding of a hole to improve performance.~~
-  - ~~This affects all complex benchmarks.~~
+  - To install Rosette 3.2, you need to install from source:
+
+    ```bash
+    git clone https://github.com/emina/rosette.git
+    raco pkg remove rosette
+    cd rosette/
+    git checkout c092b65
+    raco pkg install
+    ```
+
+Note: The general-purpose encoding version doesn't need IBM CPLEX.
+
+### ASPLOS Commands for Artifact Evaluation
+
+This reproduces the `HECATE-G` column of Table 1:
+
+```bash
+# binary-tree.grammar
+racket ./run.rkt --interface Root --traversal fuse --grammar benchmarks/grafter/binary-tree.grammar
+
+# fmm.grammar (this needs full examples)
+racket ./run.rkt --interface VirtualRoot --traversal fuse --grammar benchmarks/grafter/fmm.grammar
+
+# piecewise series
+racket ./run.rkt --interface VirtualRoot --traversal fuse --grammar benchmarks/grafter/piecewise-exp1.grammar
+racket ./run.rkt --interface VirtualRoot --traversal fuse --grammar benchmarks/grafter/piecewise-exp2.grammar
+racket ./run.rkt --interface VirtualRoot --traversal fuse --grammar benchmarks/grafter/piecewise-exp3.grammar
+
+# ast (this needs full examples, which takes a long time)
+racket ./run.rkt --interface Program --traversal fuse --grammar benchmarks/grafter/ast.grammar
+
+# render (this needs full examples)
+racket ./run.rkt --interface Document --traversal fuse --grammar benchmarks/grafter/render.grammar
+```
+
+Note: add timing commands to record time usage, e.g., `time` in Linux.
 
 ### Testing Commands
+
+This includes all commands for testing.
 
 ```bash
 # molly3.grammar: accessing list children without dependencies
@@ -50,6 +82,8 @@ racket ./run.rkt --interface VirtualRoot --traversal fusion --grammar ./benchmar
 ```
 
 ### Benchmark Commands
+
+This includes all commands for both evaluation and debugging.
 
 ```bash
 # toy.grammar
