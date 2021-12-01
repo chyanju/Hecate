@@ -20,7 +20,7 @@ This branch (`checking`) is the implementation of general-purpose encoding.
 
 Note: The general-purpose encoding version doesn't need IBM CPLEX.
 
-### ASPLOS Commands for Artifact Evaluation
+### Commands for ASPLOS Artifact Evaluation
 
 This reproduces the `HECATE-G` column of Table 1:
 
