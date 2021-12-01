@@ -18,6 +18,8 @@ This branch (`checking`) is the implementation of general-purpose encoding.
     raco pkg install
     ```
 
+- Z3 Theorem Prover ([https://github.com/Z3Prover/z3](https://github.com/Z3Prover/z3))
+
 Note: The general-purpose encoding version doesn't need IBM CPLEX.
 
 ### Commands for ASPLOS Artifact Evaluation
